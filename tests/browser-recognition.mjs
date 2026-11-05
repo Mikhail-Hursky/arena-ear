@@ -106,6 +106,9 @@ async function automatic() {
     assert.equal(first.name, 'Gold Lion Statue'); assert.equal(first.recognition.status, 'identified');
     assert.deepEqual(first.recognition.observedSize, [3, 2]); assert.equal(first.recognition.sizeSource, 'detected');
     assert.equal(first.candidates.length, 1);
+    const recognizedCard = page.getByRole('button', { name:'Выбрать ячейку cell-1-1', exact:true });
+    assert.equal(await recognizedCard.getAttribute('data-rarity-shares'), 'red:100');
+    assert.equal(await recognizedCard.locator('.slot-match').innerText(), `${(first.similarity*100).toFixed(1)}%`);
     assert.match(await page.locator('.binding-note').innerText(), /Автовыбор по кадру: cell-1-1/);
     assert.match(await page.getByRole('button', { name: 'Выбрать ячейку cell-1-1', exact: true }).innerText(), /Gold Lion Statue/);
     await page.waitForTimeout(650);
@@ -168,6 +171,12 @@ async function manual() {
     assert.equal(unconfirmed.recognition.status, 'audio-only'); assert.equal(unconfirmed.candidates.length, 2);
     assert.equal(unconfirmed.recognition.observedSize, undefined);
     result.scenarios.manualPlaceholder = { status: 'audio-only', candidates: 2, forcedOneByOneSize: false };
+    await choose();
+    const weighted = await upload(1);
+    const card = page.getByRole('button', { name:'Выбрать ячейку cell-0-0', exact:true });
+    assert.equal(await card.getAttribute('data-rarity-shares'), 'epic:66.7,legendary:33.3');
+    assert.equal(await card.locator('.slot-match').innerText(), `${(weighted.similarity*100).toFixed(1)}%`);
+    assert.match(await card.getAttribute('title'), /Доли по числу кандидатов/);
     await confirm(3, 2);
     const lion = await upload(28);
     assert.equal(lion.name, 'Gold Lion Statue'); assert.equal(lion.recognition.status, 'identified');
@@ -181,6 +190,23 @@ async function manual() {
     const sculptures = await upload(36);
     assert.equal(sculptures.recognition.status, 'ambiguous'); assert.equal(sculptures.rarity, undefined);
     assert.deepEqual(sculptures.candidates.map(item => item.name).sort(), ['Majestic Sculpture', 'Plaster Sculpture']);
+    assert.equal(await card.getAttribute('data-rarity-shares'), 'epic:50,red:50');
+    const background = await card.evaluate(element => getComputedStyle(element).backgroundImage);
+    assert.match(background, /linear-gradient/); assert.match(background, /50%/);
+    assert.match(await card.locator('.slot-rarities').innerText(), /Эпический 50%.*Красный 50%/);
+    const popupPromise = context.waitForEvent('page');
+    await page.getByRole('button', { name:'Открыть мини-виджет', exact:true }).click();
+    const popup = await popupPromise;
+    const miniCard = popup.getByRole('button', { name:'Выбрать ячейку cell-0-0', exact:true });
+    await miniCard.waitFor();
+    assert.equal(await miniCard.getAttribute('data-rarity-shares'), 'epic:50,red:50');
+    assert.match(await miniCard.locator('.slot-match').innerText(), /%/);
+    await popup.close();
+    await page.setViewportSize({width:390,height:844});
+    assert.match(await card.locator('.slot-match').innerText(), /^\d+%$/);
+    assert.equal(await card.locator('.slot-rarities').innerText(), '50/50');
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), false);
+    await page.setViewportSize({width:1440,height:1100});
     await confirm(2, 3);
     const transposed = await upload(28);
     assert.equal(transposed.status, 'unknown'); assert.equal(transposed.recognition.status, 'conflict');
@@ -188,12 +214,14 @@ async function manual() {
     await confirm(3, 3);
     const conflict = await upload(28);
     assert.equal(conflict.status, 'unknown'); assert.equal(conflict.recognition.status, 'conflict'); assert.equal(conflict.candidates.length, 0);
+    assert.equal(await card.getAttribute('data-rarities'), null);
     await choose();
     await page.getByRole('spinbutton', { name: 'Ширина предмета', exact: true }).fill('0');
     assert.equal(await page.getByRole('button', { name: 'Подтвердить размер', exact: true }).isDisabled(), true);
     result.scenarios.manual = { threeByTwo: lion.name, twoByOne: cheetah.name, repeatObservations: repeated.recognition.observations,
       ambiguous: sculptures.candidates.map(item => item.name), transposedSize: transposed.recognition.status,
-      impossibleSize: conflict.recognition.status, zeroSizeRejected: true };
+      impossibleSize: conflict.recognition.status, zeroSizeRejected: true,
+      cardColors:{weighted:'epic:66.7,legendary:33.3',halves:'epic:50,red:50',mini:true,mobile:true,conflictNeutral:true} };
   } finally { await context.close(); }
 }
 

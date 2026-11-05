@@ -57,6 +57,7 @@ import { CapturePreview } from "./components/CapturePreview";
 import { RecognitionControls } from "./components/RecognitionControls";
 import { gridSignature } from "./lib/grid-activity";
 import { resolveItemMatch } from "./lib/item-recognition";
+import { presentResult } from "./lib/result-presentation";
 
 type Page = "analyzer" | "library" | "history" | "settings" | "sound-demo";
 function pageFromHash(): Page {
@@ -78,6 +79,7 @@ function groupDescription(r: AudioMatch) {
 }
 function CandidateList({ result }: { result: AudioMatch }) {
   if (!result.candidates?.length) return null;
+  const appearance = presentResult(result);
   return (
     <div className="candidate-section">
       <p className="shared-sound-note">
@@ -89,6 +91,11 @@ function CandidateList({ result }: { result: AudioMatch }) {
         {' · '}{result.recognition.candidatesBefore} → {result.recognition.candidatesAfter}
         {result.recognition.observations > 1 && ` · наблюдений: ${result.recognition.observations}`}
       </p>}
+      <div className="rarity-breakdown" aria-label="Цвета кандидатов">
+        {appearance.shares.map(share => <span key={share.rarity} className={`candidate-rarity ${share.rarity}`}>
+          {share.label} {share.percent}%
+        </span>)}
+      </div>
       <ul
         className="candidate-list"
         aria-label="Возможные предметы"
@@ -134,22 +141,31 @@ function MerchantGrid({
       style={{ gridTemplateColumns: `repeat(${grid?.columns || 8},1fr)` }}
     >
       {grid
-        ? grid.cells.map((c) => (
+        ? grid.cells.map((c) => {
+          const appearance = presentResult(c.result);
+          return (
             <button
               key={c.id}
-              title={`Ячейка ${c.id}${c.result ? ": " + c.result.name : ""}`}
+              title={`Ячейка ${c.id}${c.result ? ": " + c.result.name + '. ' + appearance.description : ""}`}
               aria-label={`Выбрать ячейку ${c.id}`}
+              aria-description={appearance.description || undefined}
               onClick={() => onChoose(c.id)}
-              className={`slot ${selected === c.id ? "selected" : ""} ${c.result?.rarity || ""}`}
+              className={`slot ${selected === c.id ? "selected" : ""} ${c.result ? 'has-result' : ''} ${appearance.shares.length ? 'has-rarities' : ''} ${c.height === 1 ? 'short-slot' : ''}`}
+              data-rarities={appearance.shares.map(s=>s.rarity).join(',') || undefined}
+              data-rarity-shares={appearance.shares.map(s=>`${s.rarity}:${s.percent}`).join(',') || undefined}
               style={{
                 gridColumn: `${c.col + 1} / span ${c.width}`,
                 gridRow: `${c.row + 1} / span ${c.height}`,
+                background:appearance.background,
               }}
             >
               <span className="slot-id">{c.id}</span>
               {c.result ? (
                 <>
-                  <AudioLines size={mini ? 13 : 23} />
+                  <span className="slot-match" aria-label={`Сходство звука ${appearance.similarity}`}>
+                    <span className="slot-label-full">{appearance.similarity}</span>
+                    <span className="slot-label-compact">{appearance.compactSimilarity}</span>
+                  </span>
                   <span className="slot-result">
                     {c.result.recognition?.status === 'identified' ? c.result.name : c.result.status === "match"
                       ? c.result.groupId !== undefined
@@ -159,12 +175,20 @@ function MerchantGrid({
                           : "Совпадение"
                       : "Неизвестно"}
                   </span>
+                  {appearance.shares.length > 0 && <>
+                    <span className="slot-rarities">
+                      <span className="slot-label-full">{appearance.labels}</span>
+                      <span className="slot-label-compact">{appearance.compactRarities}</span>
+                    </span>
+                    <span className="slot-rarity-stripe" aria-hidden="true" style={{background:appearance.stripe}} />
+                  </>}
                 </>
               ) : (
                 <span className="slot-cross">+</span>
               )}
             </button>
-          ))
+          );
+        })
         : Array.from({ length: 48 }, (_, i) => (
             <div className="slot idle-slot" key={i}>
               <span className="slot-cross">+</span>
@@ -950,9 +974,10 @@ export default function App() {
                       Без результата
                     </span>
                     <span className="grid-hint">
-                      Нажмите на ячейку для выбора
+                      Цвета — доли кандидатов
                     </span>
                   </div>
+                  <p className="grid-color-note">Процент — сходство звука. Цветовые доли — состав кандидатов, не вероятность выпадения.</p>
                   <RecognitionControls grid={grid} cell={grid?.cells.find(c => c.id === selected)}
                     confirmed={manualSizes.current.get(selected)} autoAssociate={autoAssociate}
                     onAutoAssociate={value => { invalidatePending(); latest.current.autoAssociate = value; setAutoAssociate(value); }}
