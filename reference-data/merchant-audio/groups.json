@@ -1,0 +1,2354 @@
+{
+  "source": "https://abibuilder.com/merchant",
+  "version": "1.0.0.151.10",
+  "retrievedAt": "2026-10-27",
+  "groups": [
+    {
+      "id": 1,
+      "pickup": {
+        "event": "Item_Misc_Med_Comp_Up",
+        "files": [
+          "audio/992299122-f95b15334fb5fc95.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Med_Comp_Down",
+        "files": [
+          "audio/284785638-2b51d863352d45f6.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408010005,
+          "name": "Oil",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408010012,
+          "name": "Kerosene Lamp",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408060043,
+          "name": "Film Stock",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "pickup": {
+        "event": "Item_Container_Big_Metal_Up",
+        "files": [
+          "audio/531711706-d5bbb68f3d7a8b14.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Container_Big_Metal_Down",
+        "files": [
+          "audio/266052131-c5baca9ab448e51b.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408010006,
+          "name": "Oil Drum",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408010008,
+          "name": "Propane Tank",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408010009,
+          "name": "Fuel Tank",
+          "rarity": 5,
+          "size": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 408010014,
+          "name": "High Energy Fuel",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498010001,
+          "name": "Portable Fuel Canister",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "pickup": {
+        "event": "Item_Misc_Med_Fabric_Up",
+        "files": [
+          "audio/998453731-d5800c4550dc1946.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Med_Fabric_Down",
+        "files": [
+          "audio/751310121-65cec80e9e21c9cc.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408010015,
+          "name": "Nitrocellulose",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408010016,
+          "name": "Large-Caliber Artillery Gunpowder Pack",
+          "rarity": 5,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 408060042,
+          "name": "Camping Tarp",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408120003,
+          "name": "Paracord",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "pickup": {
+        "event": "Prop_Acc_Fuel_UP",
+        "files": [
+          "audio/605641098-c80a50fe121ac50b.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Prop_Acc_Fuel_Down",
+        "files": [
+          "audio/767137248-d7d627c39537989a.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408020015,
+          "name": "Impact-resistant Hard Rubber",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "pickup": {
+        "event": "Prop_Acc_Concrete_UP",
+        "files": [
+          "audio/1070276792-27c2471246483ea9.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Prop_Acc_Concrete_Down",
+        "files": [
+          "audio/525281813-9d65bc03b539a3c7.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408020017,
+          "name": "Bag of Cement",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "pickup": {
+        "event": "Item_Misc_Med_Metal_Crisp_Up",
+        "files": [
+          "audio/553778733-62d9b0643a58f343.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Med_Metal_Crisp_Down",
+        "files": [
+          "audio/180719148-6bfa327ad666ec6e.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408020019,
+          "name": "Titanium Alloy Plate",
+          "rarity": 5,
+          "size": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 408040004,
+          "name": "Car Battery",
+          "rarity": 5,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 498080018,
+          "name": "\"Destiny\" Gold Clay Tablet",
+          "rarity": 6,
+          "size": [
+            3,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "pickup": {
+        "event": "Prop_Acc_Plastic_Large_UP_01",
+        "files": [
+          "audio/703964868-11103b493f7462d1.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Prop_Acc_Plastic_Large_Down_02",
+        "files": [
+          "audio/867333205-0a98e6a227edca28.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408020021,
+          "name": "Rubber Pad",
+          "rarity": 3,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "pickup": {
+        "event": "Item_Misc_Med_Wood_Up",
+        "files": [
+          "audio/1053871989-b30758c58a5b64a9.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Med_Wood_Down",
+        "files": [
+          "audio/232050208-4372be30b0942fc6.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408020022,
+          "name": "Acoustic Panel",
+          "rarity": 3,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408020024,
+          "name": "Wood Board",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408080019,
+          "name": "Record Player",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408080033,
+          "name": "Vintage Typewriter",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "pickup": {
+        "event": "Item_Misc_Small_Comp_Up",
+        "files": [
+          "audio/578572427-873cc49378b498e3.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Small_Comp_Down",
+        "files": [
+          "audio/850098596-0170d517dd86320c.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408020025,
+          "name": "Sound-Muffling Cotton",
+          "rarity": 5,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 408050023,
+          "name": "High Power Flashlight",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408050028,
+          "name": "Safety Hammer",
+          "rarity": 3,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408060037,
+          "name": "Hearing Aid",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408070001,
+          "name": "Glucose Injection",
+          "rarity": 3,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408070010,
+          "name": "Bios.",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408070011,
+          "name": "Disinfectant",
+          "rarity": 1,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408120001,
+          "name": "Weapon Parts",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408120008,
+          "name": "Rangefinder Binoculars",
+          "rarity": 4,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408120009,
+          "name": "Portable Transceiver",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408140015,
+          "name": "Lens",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "pickup": {
+        "event": "Item_Misc_ElectronicDevice_Up",
+        "files": [
+          "audio/60732725-4209d556c94e9108.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_ElectronicDevice_Down",
+        "files": [
+          "audio/966836521-52a8970c05ccbf7f.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408020026,
+          "name": "Palladium Wire",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408030014,
+          "name": "Chip Processor",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408030016,
+          "name": "RAM",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408030023,
+          "name": "Floppy Drive",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408030024,
+          "name": "VGA Display Cable",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408030025,
+          "name": "UPS Unit",
+          "rarity": 5,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 408030028,
+          "name": "Vector Processor",
+          "rarity": 5,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 408050022,
+          "name": "Flashlight",
+          "rarity": 1,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408060030,
+          "name": "Game Cartridge",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408070003,
+          "name": "Thermometer",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408070012,
+          "name": "Automated External Defibrillator",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408070013,
+          "name": "Insulin Pump",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408100001,
+          "name": "Gas Analyzer",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408100002,
+          "name": "Air Tightness Tester",
+          "rarity": 4,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408100005,
+          "name": "Wave Filter",
+          "rarity": 3,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408100007,
+          "name": "Oscilloscope",
+          "rarity": 4,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408100011,
+          "name": "Antenna",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408100012,
+          "name": "Gimbal",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408100013,
+          "name": "Light Meter",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408120011,
+          "name": "Receiver",
+          "rarity": 3,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408120012,
+          "name": "Signal Jammer",
+          "rarity": 3,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408120013,
+          "name": "TI Module",
+          "rarity": 6,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408120014,
+          "name": "Radio",
+          "rarity": 4,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408120017,
+          "name": "Leveler",
+          "rarity": 5,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408120019,
+          "name": "Target Positioning Module",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408120020,
+          "name": "Laser Pointer Module",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408140001,
+          "name": "Game Console",
+          "rarity": 5,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408140005,
+          "name": "DVD",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408140016,
+          "name": "Camera",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408140019,
+          "name": "Gold Phone",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408140021,
+          "name": "Data Cable",
+          "rarity": 4,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408140022,
+          "name": "Video Camera",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408140024,
+          "name": "Laptop Computer",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "pickup": {
+        "event": "Prop_Acc_Plastic_Small_UP",
+        "files": [
+          "audio/713777504-a4f251624f8b7443.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Prop_Acc_Plastic_Small_Down",
+        "files": [
+          "audio/747643508-80527c3ace277ef4.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408030003,
+          "name": "Power Cable",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "pickup": {
+        "event": "Prop_Acc_Tech_Small_UP",
+        "files": [
+          "audio/50172621-96d5f4e5c5f4661e.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Prop_Acc_Tech_Small_Down",
+        "files": [
+          "audio/622856689-70095fa29ddc76ef.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408030004,
+          "name": "Graphics Card",
+          "rarity": 5,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408030009,
+          "name": "PSU",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408030013,
+          "name": "SSD",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "pickup": {
+        "event": "Prop_Acc_PC_UP",
+        "files": [
+          "audio/741282764-a1c637a1bd045d4f.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Prop_Acc_PC_Down",
+        "files": [
+          "audio/889653233-e4d5794b6c38a04d.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408030007,
+          "name": "Broken LCD",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408030008,
+          "name": "Working LCD",
+          "rarity": 4,
+          "size": [
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "pickup": {
+        "event": "Item_Misc_Big_Wood_Up",
+        "files": [
+          "audio/732610428-c0ebedc9cb585d7e.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Big_Wood_Down",
+        "files": [
+          "audio/414023338-3f03aa3b2a722244.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408030026,
+          "name": "Studio Monitor",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498080025,
+          "name": "Double-Neck Lute",
+          "rarity": 6,
+          "size": [
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "pickup": {
+        "event": "Prop_Acc_Battery_Small_UP_01",
+        "files": [
+          "audio/1017083920-f5c2f2ee8b87ac93.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Prop_Acc_Battery_Small_Down_01",
+        "files": [
+          "audio/296659356-17ca7b5d62c4954d.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408040001,
+          "name": "Battery",
+          "rarity": 1,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408040002,
+          "name": "D-size Battery",
+          "rarity": 1,
+          "size": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "pickup": {
+        "event": "Item_Acc_Med_Comp_Up",
+        "files": [
+          "audio/325425847-f730299389d74c32.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Acc_Med_Comp_Down",
+        "files": [
+          "audio/1027501921-c27ee80a22fb294d.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408040006,
+          "name": "Solar Panel",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "pickup": {
+        "event": "Item_Misc_Med_Metal_Blunt_Up",
+        "files": [
+          "audio/1039760777-9078744082d88bbe.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Med_Metal_Blunt_Down",
+        "files": [
+          "audio/717522741-bb203c040cff7dfb.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408040008,
+          "name": "Battery-Powered Positive Electrode Module",
+          "rarity": 5,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 408050029,
+          "name": "Portable Jack",
+          "rarity": 4,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408050030,
+          "name": "Pipe Cleaning Kit",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408050031,
+          "name": "Oil Bottle",
+          "rarity": 4,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408050032,
+          "name": "Glue Gun",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408050033,
+          "name": "Hydraulic Expander",
+          "rarity": 5,
+          "size": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 408060044,
+          "name": "Handheld Fill Light",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408060046,
+          "name": "Camping Stove",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498020001,
+          "name": "Arched Corrugated Steel Plate",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "pickup": {
+        "event": "Item_Misc_Small_Metal_Blunt_Up",
+        "files": [
+          "audio/816866179-d79e5f5895ec0927.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Small_Metal_Blunt_Down",
+        "files": [
+          "audio/64790754-2d7c434df4e49994.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408050001,
+          "name": "Electric Drill",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408050006,
+          "name": "Toolkit",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408050009,
+          "name": "Hydraulic Rebar Cutter",
+          "rarity": 4,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 408050011,
+          "name": "Pipe Wrench",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408050019,
+          "name": "Blower",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408050026,
+          "name": "Hydraulic Wrench",
+          "rarity": 5,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408080011,
+          "name": "Silver Badge",
+          "rarity": 3,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408080014,
+          "name": "Porcelain",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408080022,
+          "name": "Spur",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408080024,
+          "name": "Gold Block",
+          "rarity": 5,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408080047,
+          "name": "Skyhook Synchronized Array Mirror",
+          "rarity": 6,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408080048,
+          "name": "Sergey 1 Satellite Model",
+          "rarity": 5,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408080049,
+          "name": "Raw Diamond Ore",
+          "rarity": 5,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408120002,
+          "name": "Cannon Shell",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 498040001,
+          "name": "Solar Charger",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 498040002,
+          "name": "Ni-Cd Battery Pack",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 498060003,
+          "name": "Quantum 2000 Toy Robot",
+          "rarity": 6,
+          "size": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 498070009,
+          "name": "Infrared Therapy Lamp",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498080008,
+          "name": "Hefra Egg",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498080009,
+          "name": "Lyre",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498080010,
+          "name": "Heavenly Sphere",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498080016,
+          "name": "Amber Heart of Heaven",
+          "rarity": 6,
+          "size": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 498100003,
+          "name": "Three-Axis Gyro Controller Prototype",
+          "rarity": 6,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 498100004,
+          "name": "Handheld Receiver",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 498100005,
+          "name": "Handheld Salinity Meter",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 498100006,
+          "name": "Handheld Calculator",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 498140001,
+          "name": "Prototype Calculation Module",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498140003,
+          "name": "Capsule TV",
+          "rarity": 6,
+          "size": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 498140005,
+          "name": "MRID Clamshell Laptop",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "pickup": {
+        "event": "Item_Container_Small_Metal_Up",
+        "files": [
+          "audio/988513175-8fa15b681f6c9488.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Container_Small_Metal_Down",
+        "files": [
+          "audio/406507250-e4d4cf9199295fb9.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408050013,
+          "name": "Toolbox",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "pickup": {
+        "event": "Item_Misc_Big_Blunt_Up",
+        "files": [
+          "audio/416687564-5240e9e2a2ab1bd4.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Big_Blunt_Down",
+        "files": [
+          "audio/283723927-1b0f21fca5c3d5b8.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408050039,
+          "name": "Blowtorch",
+          "rarity": 5,
+          "size": [
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "pickup": {
+        "event": "Item_Misc_Small_Wood_Up",
+        "files": [
+          "audio/263529834-b3171bdb2ff993ac.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Small_Wood_Down",
+        "files": [
+          "audio/834192060-4e3523ffee7e4ae4.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408060021,
+          "name": "Photo Frame",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "pickup": {
+        "event": "Item_Misc_Small_Metal_Crisp_Up",
+        "files": [
+          "audio/617167031-044169993310cfbc.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Small_Metal_Crisp_Down",
+        "files": [
+          "audio/896333389-4692cbaf2596018e.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408060039,
+          "name": "Watch",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408070009,
+          "name": "Medical Scissors",
+          "rarity": 1,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408070016,
+          "name": "Metal Heart",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408080004,
+          "name": "Gold Watch",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408080050,
+          "name": "Jade Bracelet",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408080054,
+          "name": "Gold Pen",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408090019,
+          "name": "Gungnir Blueprint Fragments",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498010003,
+          "name": "Magnesium Flint",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 498040003,
+          "name": "Capacitance Analyzer",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 498060001,
+          "name": "Space Lab Toybox",
+          "rarity": 5,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 498060004,
+          "name": "Voice of Civilization Gold Record",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498060006,
+          "name": "Toland Access Card",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 498070001,
+          "name": "Handheld Tester",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 498070002,
+          "name": "EEG",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498070003,
+          "name": "Blood Glucose Meter Set",
+          "rarity": 5,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 498070004,
+          "name": "Electronic Stethoscope",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 498080001,
+          "name": "Gilded Cage Music Box",
+          "rarity": 6,
+          "size": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 498080002,
+          "name": "Phaethon's Clock",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498080003,
+          "name": "\"Dawn\"",
+          "rarity": 6,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 498080005,
+          "name": "Real Matrix",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498080006,
+          "name": "Ancient Golden Mask Replica",
+          "rarity": 6,
+          "size": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 498080011,
+          "name": "Peacock Fan",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498090001,
+          "name": "Voss' Journal",
+          "rarity": 5,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 498090002,
+          "name": "Space Boy Comic",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 498100001,
+          "name": "Aerospace Navigator",
+          "rarity": 6,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 498120001,
+          "name": "Military Tool Kit",
+          "rarity": 4,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 498120003,
+          "name": "T-147 Individual Communication Device",
+          "rarity": 5,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 498140004,
+          "name": "Personal Digital Assistant",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 498140006,
+          "name": "GU-470 Portable Recorder",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "pickup": {
+        "event": "Item_Misc_Small_Fabric_Up",
+        "files": [
+          "audio/301757322-ab8d3ed5fb5b7c8f.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Small_Fabric_Down",
+        "files": [
+          "audio/639683184-519efec7b500b09a.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408060041,
+          "name": "Bag of Fertilizer",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "pickup": {
+        "event": "Item_Misc_Small_Glass_Up",
+        "files": [
+          "audio/386392013-6776b58cb42f6b70.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Small_Glass_Down",
+        "files": [
+          "audio/502954397-0603644cf5d93aaa.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408060052,
+          "name": "Deluxe Tea Set",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498070011,
+          "name": "Pheromone Test Kit",
+          "rarity": 5,
+          "size": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": 498070012,
+          "name": "Blocker Injector",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "pickup": {
+        "event": "Item_Misc_Med_Wood_Clock_Up",
+        "files": [
+          "audio/995251327-fdc77ef7e9af604b.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Med_Wood_Clock_Down",
+        "files": [
+          "audio/805776816-9c93f01badde90b1.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408060054,
+          "name": "Lute",
+          "rarity": 4,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "pickup": {
+        "event": "Item_Glass_Up",
+        "files": [
+          "audio/868644866-c44c60bc8d094870.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Glass_Down",
+        "files": [
+          "audio/311048698-67a07d19910bf6f3.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408070002,
+          "name": "Syringe",
+          "rarity": 3,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408080015,
+          "name": "Gold-rimmed Glasses",
+          "rarity": 4,
+          "size": [
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "pickup": {
+        "event": "Item_Food_Bag_Up",
+        "files": [
+          "audio/939115653-037b5c2b9af220c4.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Food_Bag_Down",
+        "files": [
+          "audio/646753413-5fcf36ca22e9f354.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408070008,
+          "name": "Medical Sponge",
+          "rarity": 1,
+          "size": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "pickup": {
+        "event": "Prop_Acc_Statue_UP",
+        "files": [
+          "audio/248854507-05caaf503072fc44.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Prop_Acc_Statue_Down",
+        "files": [
+          "audio/923337984-a57ea5c18f87a2eb.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408080001,
+          "name": "Gold Cheetah Statue",
+          "rarity": 5,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 408080008,
+          "name": "Gold Lion Statue",
+          "rarity": 6,
+          "size": [
+            3,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "pickup": {
+        "event": "Item_Coin_Up",
+        "files": [
+          "audio/697994806-0ec7887ccb25940c.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Coin_Down",
+        "files": [
+          "audio/975277658-5018d76adfef3faa.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408080002,
+          "name": "Commemorative Coin",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408080013,
+          "name": "Gold Bracelet",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "pickup": {
+        "event": "Item_Misc_Med_Glass_Up",
+        "files": [
+          "audio/1060924062-f920d6da4a28cfc5.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Med_Glass_Down",
+        "files": [
+          "audio/696103417-e4c0d9cd7a0ab261.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408080003,
+          "name": "Vase",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498060005,
+          "name": "Northern Stars Amber Drink",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498070010,
+          "name": "Mutant Heart Sample",
+          "rarity": 5,
+          "size": [
+            2,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "pickup": {
+        "event": "Prop_Acc_Clock_UP",
+        "files": [
+          "audio/1014709136-44f2595ca2d53b75.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Prop_Acc_Clock_Down",
+        "files": [
+          "audio/988896409-7a47a68be6be9ae7.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408080009,
+          "name": "Desk Clock",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "pickup": {
+        "event": "Prop_Acc_Teapot_UP",
+        "files": [
+          "audio/296241922-fab774a91cfce392.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Prop_Acc_Teapot_Down",
+        "files": [
+          "audio/164286077-0adb5c8954ae0c37.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408080010,
+          "name": "Antique Teapot",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "pickup": {
+        "event": "Item_GoldChain_Up",
+        "files": [
+          "audio/948946180-d15249feefb06625.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_GoldChain_Down",
+        "files": [
+          "audio/159923898-1b3f127332d3b610.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408080012,
+          "name": "Silver Chain",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408080020,
+          "name": "Pocket Watch",
+          "rarity": 4,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408080025,
+          "name": "Diamond Ring",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408080026,
+          "name": "Brooch",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408080029,
+          "name": "Gem Necklace",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498080019,
+          "name": "Star of Kamona Pendant",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "pickup": {
+        "event": "Item_Misc_Med_Paper_Up",
+        "files": [
+          "audio/983789101-b4c1e1f0ddee0deb.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Med_Paper_Down",
+        "files": [
+          "audio/809408391-e36df80f7b84a19a.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408080016,
+          "name": "Stamp Album",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "pickup": {
+        "event": "Item_Misc_Small_Paper_Up",
+        "files": [
+          "audio/256981297-2908bce80d665a7f.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Small_Paper_Down",
+        "files": [
+          "audio/745209120-07acb5d374ae6671.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408080021,
+          "name": "Stamp",
+          "rarity": 3,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408090001,
+          "name": "Document",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 498090008,
+          "name": "Dried Flower Bookmark",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 498090010,
+          "name": "Mutant Evolution Sketch",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "pickup": {
+        "event": "Item_Misc_Med_Statue_Up",
+        "files": [
+          "audio/868091829-f77fc01a02e73f56.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Med_Statue_Down",
+        "files": [
+          "audio/607103379-3fbc97f8c3b32069.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408080028,
+          "name": "Gold Cube",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 408080030,
+          "name": "Gold Cup",
+          "rarity": 5,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408080038,
+          "name": "Plaster Sculpture",
+          "rarity": 4,
+          "size": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 408080039,
+          "name": "Majestic Sculpture",
+          "rarity": 6,
+          "size": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": 408080041,
+          "name": "Gold Snake",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408120005,
+          "name": "Military Canteen",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 498070013,
+          "name": "Mutated Tissue Mass",
+          "rarity": 5,
+          "size": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": 498080017,
+          "name": "Optoelectronic Hyperspace Model",
+          "rarity": 6,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 498100002,
+          "name": "K7-L Cipher Machine",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "pickup": {
+        "event": "Item_Misc_Big_Paper_Up",
+        "files": [
+          "audio/717297612-451dd7b1d6479190.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Item_Misc_Big_Paper_Down",
+        "files": [
+          "audio/83117770-ccb2af91132a0399.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408090002,
+          "name": "Hardcover",
+          "rarity": 3,
+          "size": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": 408090004,
+          "name": "Folder",
+          "rarity": 5,
+          "size": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": 498090009,
+          "name": "Bundle of Rice Paper",
+          "rarity": 4,
+          "size": [
+            1,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "pickup": {
+        "event": "Prop_Acc_Radio_UP",
+        "files": [
+          "audio/955712259-410fd6625d57d604.ogg"
+        ]
+      },
+      "drop": {
+        "event": "Prop_Acc_Radio_Down",
+        "files": [
+          "audio/478913051-f34415981af809c4.ogg"
+        ]
+      },
+      "candidates": [
+        {
+          "id": 408120010,
+          "name": "Military Radio",
+          "rarity": 5,
+          "size": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": 408140014,
+          "name": "Classic Radio",
+          "rarity": 3,
+          "size": [
+            2,
+            1
+          ]
+        }
+      ]
+    }
+  ]
+}

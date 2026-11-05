@@ -1,0 +1,34 @@
+# Capture and floating window
+
+`requestCapture()` in `src/lib/capture.ts` must be called directly from a user click. It asks the browser for a user-selected screen/window/tab with video and shared audio. It requests `systemAudio: include` and `windowAudio: window`; these are browser hints, not guarantees. It never requests a microphone. The caller must check `stream.getAudioTracks()` and explain a missing shared audio track. The caller owns the stream and must stop tracks on disconnect. `supportsCapture()` and `describeCaptureError()` support the connection UI.
+
+Capture needs HTTPS or localhost, browser permission, and sometimes OS screen-recording permission. The browser/OS decides whether game-window or system audio is available. A website cannot bypass the source picker or promise audio on every platform.
+
+`GridScanner` is exported from `src/lib/capture.ts`. Construct with `{ onDetection, onFrame? }`, call `start(stream, region?)`, and control it through `setRegion(region)`, `setEnabled(boolean)`, and `stop()`. It processes a downsampled frame (maximum 960 px wide) approximately every 700 ms. `onFrame` receives a reusable canvas. `stop()` detaches its own video and timer without stopping shared media tracks.
+
+`detectGrid(imageData, region?)` uses actual luminance contrasts and long horizontal/vertical border projections within a normalized 0..1 crop. It requires at least two rows and columns, repeated near-uniform spacing, and a strong closed outer frame. Missing local separators combine units into rectangular merged cells. Width and height are unit counts; detected region bounds remain normalized to the original image. `null` means insufficient evidence, not an empty inventory. `createManualGrid(columns, rows)` explicitly creates a manual grid and never presents it as detected.
+
+This is a conservative geometric detector, not a trained Arena merchant model. Decorative line patterns can resemble grids; occluded borders, perspective, low contrast, fully missing unit lines, varying unit spacing, or overlapping items can prevent detection. It does not identify item images, infer rarity, or associate sounds with cells. Synthetic tests cover visible borders, a merged rectangle, blank input and invalid crop. Real-game accuracy has not been measured. Use manual crop and manual grid controls when detection is unavailable.
+
+`openOverlay()` in `src/lib/overlay.ts` must also run directly from a user click. It returns `{ window, close }` for a React portal. It copies current styles and uses Document Picture-in-Picture when supported. Otherwise it uses a popup. Ordinary popup windows cannot promise always-on-top behavior; browser popup blocking can prevent opening. PiP is browser-dependent and can close when the opener navigates. The caller should listen to the returned window's `pagehide` to update UI state and stop using the portal when it closes.
+
+API references verified against MDN:
+
+- [getDisplayMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia)
+- [DocumentPictureInPicture.requestWindow](https://developer.mozilla.org/en-US/docs/Web/API/DocumentPictureInPicture/requestWindow)
+
+## Frame identity, scrolling and pointer limits
+
+Each detection describes only the current frame. Cell IDs encode local row/column, not persistent item identity. Scrolling a merchant inventory can move a different item into the same local cell. The scanner does not reconstruct offscreen rows, track scroll offsets, or reconcile cell history across pages. Treat a changed viewport as a new inventory view and use the manual grid/region controls when visible borders do not permit detection. It is unsafe to claim unchanged item identity from identical row/column IDs alone.
+
+`GridScanner` accepts an optional `onError(error)` callback. A failed initial `video.play()` rejects `start()` after cleanup. A later frame-processing or consumer callback exception stops the scanner, detaches its video, and calls `onError`; it does not retain an orphan timer. Cancelling/restarting during pending playback cannot dispose a newer session. Region objects are copied, so callers should use `setRegion()` for changes.
+
+A screen-capture stream provides pixels and optional audio; it does not provide the captured game's DOM, item hit targets, or global mouse coordinates. The [Screen Capture API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API) documents `cursor` as a visibility setting (`always`, `motion`, `never`), not a stream of pointer positions. [CaptureController](https://developer.mozilla.org/en-US/docs/Web/API/CaptureController) offers focus, zoom and limited scrolling controls. Its experimental [forwardWheel](https://developer.mozilla.org/en-US/docs/Web/API/CaptureController/forwardWheel) applies to captured browser tabs, not arbitrary game windows; it is not native-game hover automation.
+
+A future automatic hover-to-cell system would need a separately validated visual cursor/highlight detector or an explicitly installed native companion with OS permissions. Browser pointer events can associate a user's click with a cell in the app's own preview, but those coordinates are not the game's live cursor and cannot establish native-game hover. Neither future mechanism is implemented here.
+
+## Subdued border path and measured tutorial samples
+
+The detector has a second path for faint borders. It looks for narrow light/dark ridges with little variation along the line, fits a repeated lattice supported by at least five observed borders per axis, and rejects isolated text/decoration peaks. It may recover one adjacent border only when actual long-edge pixels corroborate the predicted unit position. Confidence is capped at 0.68. Ambiguous nonrectangular components are omitted in this path, so the result can contain gaps; a strong bright-border L-shaped contradiction remains a rejection. The returned cells are geometric candidates, not a guarantee of exact item segmentation.
+
+On three supplied public tutorial frames decoded at 960×540 (32, 42 and 52 seconds), the default crop produced a 9-column × 11-row lattice in all three frames, with respectively 46, 46 and 43 candidate rectangles. Approximate bounds were x=627..915 and y=94..446 for the first frame; later samples shifted to y=100..452. These samples contain tutorial captions, highlights and item text. Rectangles were not exhaustively labeled against ground truth; candidate count changes and omitted ambiguous components must not be presented as stable item identity or proven game accuracy. The large third-party pixel arrays remain temporary QA inputs and are not repository fixtures. Generated low-contrast synthetic tests cover the new path without copying those assets.
