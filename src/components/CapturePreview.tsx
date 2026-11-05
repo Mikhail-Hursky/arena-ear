@@ -1,15 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import type { PointerEvent } from "react";
-import type { GridRegion } from "../types";
+import type { GridDetection, GridRegion } from "../types";
+import { cellAtPoint } from "../lib/grid-activity";
 
 export function CapturePreview({
   stream,
   region,
   onRegionChange,
+  grid,
+  selected,
+  onChoose,
 }: {
   stream: MediaStream;
   region: GridRegion;
   onRegionChange: (region: GridRegion) => void;
+  grid?: GridDetection | null;
+  selected?: string;
+  onChoose?: (id: string) => void;
 }) {
   const video = useRef<HTMLVideoElement>(null),
     start = useRef<{ x: number; y: number } | null>(null);
@@ -77,7 +84,7 @@ export function CapturePreview({
         />
         <div
           aria-label={
-            editing ? "Выделение области торговца" : "Область поиска торговца"
+            editing ? "Выделение области торговца" : "Выбор груза на превью"
           }
           style={{
             position: "absolute",
@@ -96,7 +103,14 @@ export function CapturePreview({
               setDraft(rect(start.current, point(e)));
           }}
           onPointerUp={(e) => {
-            if (!editing || !start.current) return;
+            if (!editing) {
+              if (grid?.source === 'detected') {
+                const cell = cellAtPoint(grid, point(e));
+                if (cell) onChoose?.(cell.id);
+              }
+              return;
+            }
+            if (!start.current) return;
             const next = rect(start.current, point(e));
             start.current = null;
             setDraft(null);
@@ -110,6 +124,15 @@ export function CapturePreview({
             setDraft(null);
           }}
         >
+          {!editing && grid?.source === 'detected' && grid.cells.map(cell => <div key={cell.id} style={{
+            position:'absolute', pointerEvents:'none', boxSizing:'border-box',
+            left:`${(grid.region.x + cell.col / grid.columns * grid.region.width) * 100}%`,
+            top:`${(grid.region.y + cell.row / grid.rows * grid.region.height) * 100}%`,
+            width:`${cell.width / grid.columns * grid.region.width * 100}%`,
+            height:`${cell.height / grid.rows * grid.region.height * 100}%`,
+            border:cell.id === selected ? '2px solid #e2ee78' : '1px solid #e2ee7840',
+            background:cell.id === selected ? '#e2ee7822' : undefined,
+          }}><span style={{color:'#e2ee78',fontSize:9,lineHeight:1.4,background:'#000a'}}>{cell.result?.recognition?.status === 'identified' ? cell.result.name : `${cell.width}×${cell.height}`}</span></div>)}
           <div
             style={{
               position: "absolute",

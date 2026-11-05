@@ -1,7 +1,7 @@
 {
-  "source": "https://abibuilder.com/merchant",
-  "version": "1.0.0.151.10",
-  "retrievedAt": "2026-10-27",
+  "source": "https://abi-tracker.azurewebsites.net/GameInfo/Merchant?lang=en",
+  "version": "1.0.0.151.17",
+  "retrievedAt": "2026-11-05",
   "groups": [
     {
       "id": 1,
@@ -2350,5 +2350,11 @@
         }
       ]
     }
-  ]
+  ],
+  "sources": [
+    "https://abibuilder.com/merchant",
+    "https://abi-tracker.azurewebsites.net/GameInfo/Merchant?lang=en"
+  ],
+  "verifiedAt": "2026-11-05",
+  "coverage": "public-field-merchant-catalog"
 }

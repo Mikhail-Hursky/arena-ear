@@ -28,6 +28,7 @@ import type {
   Rarity,
   Settings,
   SoundReference,
+  ItemSizeEvidence,
 } from "./types";
 import { AudioEngine, analyzeFile, createReference } from "./lib/audio";
 import {
@@ -51,8 +52,11 @@ import {
 import { MAPS, RARITY_LABELS, DEMO_GRID, createDemoResult } from "./lib/demo";
 import "./styles.css";
 import SoundDemo from "./components/SoundDemo";
-import { BUILTIN_GROUPS, loadBuiltinReferences } from "./lib/builtin-sounds";
+import { BUILTIN_GROUPS, BUILTIN_REFERENCES, BUILTIN_REFERENCE_COUNT } from "./lib/builtin-sounds";
 import { CapturePreview } from "./components/CapturePreview";
+import { RecognitionControls } from "./components/RecognitionControls";
+import { gridSignature } from "./lib/grid-activity";
+import { resolveItemMatch } from "./lib/item-recognition";
 
 type Page = "analyzer" | "library" | "history" | "settings" | "sound-demo";
 function pageFromHash(): Page {
@@ -77,8 +81,14 @@ function CandidateList({ result }: { result: AudioMatch }) {
   return (
     <div className="candidate-section">
       <p className="shared-sound-note">
-        Общий звук группы. По звуку нельзя определить один предмет.
+        {result.recognition?.reason || 'Общий звук группы. Размер груза поможет сузить список.'}
       </p>
+      {result.recognition?.observedSize && <p className="recognition-summary">
+        {result.recognition.status === 'identified' ? 'Один кандидат по звуку и размеру' : 'Подходящие кандидаты'}
+        {' · '}{result.recognition.observedSize.join(' × ')} яч.
+        {' · '}{result.recognition.candidatesBefore} → {result.recognition.candidatesAfter}
+        {result.recognition.observations > 1 && ` · наблюдений: ${result.recognition.observations}`}
+      </p>}
       <ul
         className="candidate-list"
         aria-label="Возможные предметы"
@@ -141,7 +151,7 @@ function MerchantGrid({
                 <>
                   <AudioLines size={mini ? 13 : 23} />
                   <span className="slot-result">
-                    {c.result.status === "match"
+                    {c.result.recognition?.status === 'identified' ? c.result.name : c.result.status === "match"
                       ? c.result.groupId !== undefined
                         ? `Группа ${c.result.groupId}`
                         : c.result.rarity
@@ -197,18 +207,17 @@ export default function App() {
     [sampleName, setSampleName] = useState(""),
     [rarity, setRarity] = useState<Rarity>("red"),
     [recording, setRecording] = useState(false);
-  const [builtinRefs, setBuiltinRefs] = useState<SoundReference[]>([]),
-    [builtinStatus, setBuiltinStatus] = useState<"loading" | "ready" | "error">(
-      "loading",
-    ),
-    [builtinProgress, setBuiltinProgress] = useState(0),
-    [builtinError, setBuiltinError] = useState(""),
-    [builtinAttempt, setBuiltinAttempt] = useState(0);
+  const builtinRefs = BUILTIN_REFERENCES;
+  const [autoAssociate, setAutoAssociate] = useState(true),
+    [allowRotation, setAllowRotation] = useState(true),
+    [binding, setBinding] = useState('');
+  const manualSizes = useRef(new Map<string, ItemSizeEvidence>());
+  const [, sizeChanged] = useState(0);
   const combinedReferences = useMemo(
     () => [...builtinRefs, ...refs],
     [builtinRefs, refs],
   );
-  const referenceReady = builtinStatus === "ready";
+  const referenceReady = true;
   function setPage(next: Page) {
     if (next === "sound-demo") stop();
     location.hash = next === "sound-demo" ? "/demo" : `/${next}`;
@@ -222,33 +231,10 @@ export default function App() {
   useEffect(() => {
     if (page === "sound-demo") stop();
   }, [page]);
-  useEffect(() => {
-    let active = true;
-    setBuiltinStatus("loading");
-    setBuiltinError("");
-    loadBuiltinReferences((loaded) => {
-      if (active) setBuiltinProgress(loaded);
-    })
-      .then((loaded) => {
-        if (active) {
-          setBuiltinRefs(loaded);
-          setBuiltinStatus("ready");
-        }
-      })
-      .catch((e) => {
-        if (active) {
-          setBuiltinStatus("error");
-          setBuiltinError(String(e));
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [builtinAttempt]);
   const stream = useRef<MediaStream | null>(null),
     engine = useRef<AudioEngine | null>(null),
     scanner = useRef<GridScanner | null>(null),
-    latest = useRef({ selected, map, settings, refs: combinedReferences }),
+    latest = useRef({ selected, map, settings, refs: combinedReferences, autoAssociate, allowRotation }),
     mounted = useRef(true),
     overlayRef = useRef<typeof overlay>(null),
     gridRef = useRef<GridDetection | null>(null),
@@ -259,10 +245,29 @@ export default function App() {
       map: string;
       generation: number;
       epoch: number;
+      size?: ItemSizeEvidence;
+      binding: string;
     } | null>(null);
   function invalidatePending() {
     gridEpoch.current++;
     pendingBurst.current = null;
+  }
+  function sizeForCell(cellId: string, detection = gridRef.current): ItemSizeEvidence | undefined {
+    const confirmed = manualSizes.current.get(cellId);
+    if (confirmed) return { ...confirmed, allowRotation: latest.current.allowRotation };
+    const cell = detection?.cells.find(c => c.id === cellId);
+    if (detection?.source === 'detected' && !scanner.current?.hasFreshDetection()) return;
+    return detection?.source === 'detected' && cell
+      ? { width:cell.width, height:cell.height, source:'detected', confidence:detection.confidence, allowRotation:latest.current.allowRotation }
+      : undefined;
+  }
+  function resetView(message = '') {
+    invalidatePending();
+    manualSizes.current.clear(); sizeChanged(n => n + 1);
+    latest.current.selected = ''; setSelected(''); setResult(null); setBinding(message);
+    const g = gridRef.current;
+    const cleared = g ? { ...g, cells:g.cells.map(({result:_result, rarity:_rarity, ...cell}) => cell) } : null;
+    gridRef.current = cleared; setGrid(cleared);
   }
   function disarm(cell: string) {
     if (latest.current.selected === cell) {
@@ -277,13 +282,23 @@ export default function App() {
   }
   gridRef.current = grid;
   overlayRef.current = overlay;
-  latest.current = { selected, map, settings, refs: combinedReferences };
+  latest.current = { selected, map, settings, refs: combinedReferences, autoAssociate, allowRotation };
+  const previousGeometrySettings = useRef(JSON.stringify([settings.region, settings.autoScan, settings.gridColumns, settings.gridRows]));
+  useEffect(() => {
+    const identity = JSON.stringify([settings.region, settings.autoScan, settings.gridColumns, settings.gridRows]);
+    if (identity !== previousGeometrySettings.current) resetView();
+    previousGeometrySettings.current = identity;
+  }, [settings.region, settings.autoScan, settings.gridColumns, settings.gridRows]);
   useEffect(() => {
     saveSettings(settings);
     engine.current?.setSensitivity(settings.sensitivity);
     engine.current?.setThreshold(settings.matchThreshold);
     scanner.current?.setRegion(settings.region);
     scanner.current?.setEnabled(settings.autoScan);
+    if (!settings.autoScan && gridRef.current?.source === 'detected') {
+      const manual: GridDetection = { ...gridRef.current, source:'manual', confidence:0 };
+      gridRef.current = manual; setGrid(manual);
+    }
   }, [settings]);
   useEffect(() => {
     saveReferences(refs);
@@ -305,9 +320,11 @@ export default function App() {
     setBusy(false);
     setDemo(false);
     setGrid(null);
+    gridRef.current = null;
     setSelected("");
     latest.current.selected = "";
     setResult(null);
+    setBinding(''); manualSizes.current.clear();
     engine.current?.stop();
     scanner.current?.stop();
     stream.current?.getTracks().forEach((t) => t.stop());
@@ -352,7 +369,7 @@ export default function App() {
     capturedMap = latest.current.map,
   ) {
     if (!cell && !isDemo) return;
-    if (isDemo || latest.current.selected === cell) setResult(r);
+    setResult(r);
     if (!cell) return;
     setGrid((g) =>
       g
@@ -426,13 +443,17 @@ export default function App() {
           }
         },
         onEventStart: () => {
-          pendingBurst.current =
-            current() && latest.current.selected
+          const observed = scanner.current?.eventTarget();
+          const visual = latest.current.autoAssociate ? observed : undefined;
+          const cell = latest.current.selected || visual || '';
+          pendingBurst.current = current()
               ? {
-                  cell: latest.current.selected,
+                  cell,
                   map: latest.current.map,
                   generation,
                   epoch: gridEpoch.current,
+                  size:sizeForCell(cell),
+                  binding:latest.current.selected ? `Выбрана вручную: ${cell}` : visual ? `Автовыбор по кадру: ${cell}` : 'Ячейка не определена. Выберите груз в сетке или на превью и повторите звук.',
                 }
               : null;
         },
@@ -445,11 +466,13 @@ export default function App() {
             armed.generation !== captureGeneration.current ||
             armed.epoch !== gridEpoch.current ||
             armed.map !== latest.current.map ||
-            !gridRef.current?.cells.some((c) => c.id === armed.cell)
+            (armed.cell && !gridRef.current?.cells.some((c) => c.id === armed.cell))
           )
             return;
-          accept(r, false, armed.cell, armed.map);
-          disarm(armed.cell);
+          const resolved = resolveItemMatch(r, armed.size);
+          setBinding(armed.binding);
+          if (armed.cell) { accept(resolved, false, armed.cell, armed.map); disarm(armed.cell); }
+          else setResult(resolved);
         },
       });
       ownedEngine = a;
@@ -466,26 +489,31 @@ export default function App() {
         onDetection: (d) => {
           if (!current()) return;
           const g = gridRef.current;
-          const signature = (v: GridDetection) =>
-            JSON.stringify([
-              v.columns,
-              v.rows,
-              v.cells.map((c) => [c.id, c.row, c.col, c.width, c.height]),
-            ]);
-          if (g && signature(g) === signature(d))
-            setGrid({
+          if (g && gridSignature(g) === gridSignature(d)) {
+            const next = {
               ...d,
               cells: d.cells.map((c) => ({
                 ...c,
                 result: g.cells.find((old) => old.id === c.id)?.result,
               })),
-            });
-          else {
-            setGrid(d);
-            setSelected("");
-            latest.current.selected = "";
-            setResult(null);
+            };
+            gridRef.current = next; setGrid(next);
           }
+          else {
+            resetView(); gridRef.current = d; setGrid(d);
+          }
+        },
+        onViewChange: (reason) => {
+          if (!current()) return;
+          resetView(reason === 'lost' ? 'Сетка больше не видна. Размеры не используются до нового обнаружения.' : 'Кадр торговца изменился. Прежние результаты очищены; выберите груз или дождитесь нового движения.');
+          if (reason === 'lost') { gridRef.current = null; setGrid(null); }
+        },
+        onCellsChanged: (ids) => {
+          if (!current()) return;
+          const g = gridRef.current;
+          if (!g?.cells.some(c => ids.includes(c.id) && c.result)) return;
+          const next = { ...g, cells:g.cells.map(c => ids.includes(c.id) ? { ...c, result:undefined, rarity:undefined } : c) };
+          gridRef.current = next; setGrid(next);
         },
         onError: (message) => {
           if (current()) setError(String(message));
@@ -499,7 +527,7 @@ export default function App() {
         cleanup();
         return;
       }
-      setGrid(
+      if (!gridRef.current) setGrid(
         createManualGrid(
           latest.current.settings.gridColumns,
           latest.current.settings.gridRows,
@@ -522,23 +550,10 @@ export default function App() {
     }
   }
   function clearGrid() {
-    invalidatePending();
-    setGrid((g) =>
-      g
-        ? {
-            ...g,
-            cells: g.cells.map(
-              ({ result: _result, rarity: _rarity, ...cell }) => cell,
-            ),
-          }
-        : g,
-    );
-    setSelected("");
-    latest.current.selected = "";
-    setResult(null);
+    resetView();
   }
   function manualGrid() {
-    invalidatePending();
+    resetView();
     if (!live) stop();
     scanner.current?.setEnabled(false);
     setSettings((s) => ({ ...s, autoScan: false }));
@@ -560,11 +575,20 @@ export default function App() {
     setError("");
   }
   function choose(id: string) {
+    invalidatePending();
     latest.current.selected = id;
     setSelected(id);
     const c = grid?.cells.find((c) => c.id === id);
     setResult(c?.result || null);
     if (demo) accept(createDemoResult(id), true, id);
+  }
+  function confirmSize(evidence?: ItemSizeEvidence) {
+    if (!selected) return;
+    invalidatePending();
+    if (evidence) manualSizes.current.set(selected, evidence); else manualSizes.current.delete(selected);
+    sizeChanged(n => n + 1);
+    setResult(null);
+    setGrid(g => g ? { ...g, cells:g.cells.map(c => c.id === selected ? { ...c, result:undefined, rarity:undefined } : c) } : g);
   }
   async function addFile(file: File) {
     setBusy(true);
@@ -620,15 +644,18 @@ export default function App() {
       map: latest.current.map,
       generation: captureGeneration.current,
       epoch: gridEpoch.current,
+      size:sizeForCell(latest.current.selected),
     };
     setBusy(true);
     setError("");
     try {
-      const matched = await analyzeFile(
+      const audio = await analyzeFile(
         file,
         combinedReferences,
         settings.matchThreshold,
       );
+      const matched = resolveItemMatch(audio, armed.size);
+      setBinding(armed.cell ? `Аудиофайл · ${armed.cell}` : 'Анализ аудиофайла без привязки к ячейке');
       if (!mounted.current) return;
       const valid =
         armed.generation === captureGeneration.current &&
@@ -823,20 +850,6 @@ export default function App() {
             </div>
           )}
           {page === "sound-demo" && <SoundDemo />}
-          {builtinStatus !== "ready" &&
-            page !== "library" &&
-            page !== "sound-demo" && (
-              <div className="builtin-loading-banner" role="status">
-                {builtinStatus === "loading"
-                  ? `Подготавливаем игровые звуки: ${builtinProgress} / 76`
-                  : "Не удалось загрузить встроенные звуки."}
-                {builtinStatus === "error" && (
-                  <button onClick={() => setBuiltinAttempt((v) => v + 1)}>
-                    Повторить загрузку
-                  </button>
-                )}
-              </div>
-            )}
           {page === "analyzer" && (
             <>
               <div className="workspace">
@@ -889,7 +902,7 @@ export default function App() {
                       {demo
                         ? "Иллюстративные данные"
                         : live
-                          ? "Выберите ячейку перед звуком"
+                          ? autoAssociate ? "Автовыбор по кадру + размер" : "Выберите ячейку перед звуком"
                           : "Готов к подключению"}
                     </span>
                   </div>
@@ -941,6 +954,11 @@ export default function App() {
                       Нажмите на ячейку для выбора
                     </span>
                   </div>
+                  <RecognitionControls grid={grid} cell={grid?.cells.find(c => c.id === selected)}
+                    confirmed={manualSizes.current.get(selected)} allowRotation={allowRotation} autoAssociate={autoAssociate}
+                    onAutoAssociate={value => { invalidatePending(); latest.current.autoAssociate = value; setAutoAssociate(value); }}
+                    onRotation={value => { invalidatePending(); latest.current.allowRotation = value; setAllowRotation(value); }}
+                    onConfirm={confirmSize} onClear={() => confirmSize()} />
                 </section>
                 <aside className="analysis-panel">
                   <div className="panel-label">02 / АНАЛИЗ СИГНАЛА</div>
@@ -975,6 +993,7 @@ export default function App() {
                     <div className="section-label">
                       ВЫБРАННАЯ ЯЧЕЙКА <b>{selected || "—"}</b>
                     </div>
+                    {binding && <p className="binding-note">{binding}</p>}
                     {result ? (
                       <>
                         <div className={`result-symbol ${result.rarity || ""}`}>
@@ -988,6 +1007,7 @@ export default function App() {
                               "Нет достаточно близкого образца"}
                         </p>
                         <CandidateList result={result} />
+                        {result.recognition?.status === 'conflict' && <p className="recognition-conflict">{result.recognition.reason}</p>}
                         {demo && (
                           <span className="tag demo-tag">
                             ДЕМО · ИЛЛЮСТРАЦИЯ
@@ -1004,8 +1024,8 @@ export default function App() {
                         </h3>
                         <p>
                           {selected
-                            ? "Перетяните эту ячейку в игре. После одного сигнала выберите ячейку снова."
-                            : "Результат появится здесь после анализа игрового звука."}
+                            ? "Проверьте размер груза и перетяните его в игре."
+                            : "Сдвиньте один груз в видимой сетке. Если автовыбор не сработает, выберите его вручную."}
                         </p>
                       </>
                     )}
@@ -1013,11 +1033,7 @@ export default function App() {
                   <div className="reference-note">
                     <BookOpen size={17} />
                     <span>
-                      {builtinStatus === "loading"
-                        ? `Загрузка звуков: ${builtinProgress}/76`
-                        : builtinStatus === "error"
-                          ? "Встроенные звуки не загружены"
-                          : `76 встроенных + ${refs.length} личных образцов`}
+                      {`${BUILTIN_REFERENCE_COUNT} встроенных · готовы сразу${refs.length ? ` + ${refs.length} личных` : ''}`}
                       <button onClick={() => setPage("library")}>
                         Библиотека и состояние загрузки ↗
                       </button>
@@ -1076,8 +1092,9 @@ export default function App() {
               </div>
               {grid && (
                 <p className="scroll-warning">
-                  После прокрутки торговца очистите сетку. Выбирайте ячейку
-                  перед каждым звуком и дождитесь результата.
+                  Автовыбор использует изменение одной ячейки рядом со звуком.
+                  Массовое изменение кадра очищает прежние результаты. После прокрутки
+                  проверьте сетку; при сомнении очистите её вручную. Одинаковые звук и размер могут соответствовать нескольким предметам.
                 </p>
               )}
               {preview && (
@@ -1086,6 +1103,7 @@ export default function App() {
                     <CapturePreview
                       stream={stream.current!}
                       region={settings.region}
+                      grid={grid} selected={selected} onChoose={choose}
                       onRegionChange={(region) => {
                         clearGrid();
                         setSettings((s) => ({ ...s, region }));
@@ -1144,34 +1162,15 @@ export default function App() {
             <>
               <section className="content-panel builtin-card">
                 <div className="panel-label">ВСТРОЕННАЯ БИБЛИОТЕКА</div>
-                <h2>38 групп / 76 игровых звуков</h2>
+                <h2>{BUILTIN_GROUPS.length} групп / {BUILTIN_REFERENCE_COUNT} игровых звуков</h2>
                 <p className="muted">
                   Звуки поднятия и размещения предметов. Группа может включать
-                  несколько предметов разной редкости.
+                  несколько предметов разной редкости. Библиотека встроена в сайт и готова сразу — загружать свои файлы не требуется.
                 </p>
                 <div className="builtin-status" role="status">
-                  {builtinStatus === "loading"
-                    ? `Подготавливаем встроенные образцы: ${builtinProgress} / 76`
-                    : builtinStatus === "ready"
-                      ? `Готово: ${BUILTIN_GROUPS.length} групп · ${builtinRefs.length} звуков`
-                      : `Ошибка: ${builtinError}`}
+                  {`Готово: ${BUILTIN_GROUPS.length} групп · ${builtinRefs.length} звуков`}
                 </div>
-                {builtinStatus === "loading" && (
-                  <progress
-                    max={76}
-                    value={builtinProgress}
-                    aria-label="Загрузка встроенных звуков"
-                  />
-                )}
                 <div className="builtin-actions">
-                  {builtinStatus === "error" && (
-                    <button
-                      className="secondary"
-                      onClick={() => setBuiltinAttempt((v) => v + 1)}
-                    >
-                      Повторить загрузку
-                    </button>
-                  )}
                   <button
                     className="primary"
                     onClick={() => setPage("sound-demo")}
@@ -1186,7 +1185,7 @@ export default function App() {
               </section>
               <section className="content-panel">
                 <div className="panel-label">НОВЫЙ ЭТАЛОН</div>
-                <h2>Добавить звуковой образец</h2>
+                <h2>Личная запись · необязательно</h2>
                 <p className="muted">
                   Запишите отдельный звук известного предмета. Чистые и
                   одинаковые по условиям записи улучшают сопоставление.
@@ -1570,8 +1569,7 @@ export default function App() {
             <h2 id="guide-title">Сначала звук. Затем результат.</h2>
             <ol>
               <li>
-                Дождитесь загрузки 76 встроенных образцов. При желании добавьте
-                личные записи.
+                Все {BUILTIN_REFERENCE_COUNT} звуков уже встроены и готовы. Загружать свои записи не требуется.
               </li>
               <li>Откройте игру и торговца. Выберите локацию в интерфейсе.</li>
               <li>
@@ -1583,8 +1581,8 @@ export default function App() {
                 необходимости задайте сетку вручную.
               </li>
               <li>
-                Выберите ячейку в этой панели, затем перетяните соответствующую
-                ячейку в игре, чтобы получить звук.
+                Перетяните один груз в игре. Автовыбор ищет локальное изменение кадра.
+                Если ячейка не выбрана, нажмите на неё в панели или превью. Проверьте её размер.
               </li>
               <li>
                 Смотрите результат сопоставления и сходство. Откройте
@@ -1594,10 +1592,10 @@ export default function App() {
             <div className="guide-caveat">
               <b>Что важно знать</b>
               <p>
-                Это независимый инструмент сопоставления с 76 встроенными
-                игровыми звуками и вашими образцами. Общий звук определяет
-                группу возможных предметов, а не единственный предмет или его
-                редкость. Курсор игры автоматически не отслеживается. Поддержка
+                Это независимый инструмент сопоставления со встроенными
+                игровыми звуками. Звук и подтверждённый размер сужают список;
+                одинаковые признаки могут оставлять несколько кандидатов.
+                Автовыбор по кадру — эвристика, проверяйте рамку груза. Поддержка
                 системного звука зависит от браузера и ОС; выбирайте источник с
                 доступным аудио. Режим демо всегда помечен.
               </p>

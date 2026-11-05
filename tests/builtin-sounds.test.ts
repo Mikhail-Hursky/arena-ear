@@ -1,24 +1,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import catalog from '../src/data/merchant-groups.json';
-import { BUILTIN_GROUPS, BUILTIN_ITEMS, BUILTIN_REFERENCE_COUNT } from '../src/lib/builtin-sounds';
+import manifest from '../src/data/merchant-features.json';
+import { BUILTIN_GROUPS, BUILTIN_ITEMS, BUILTIN_REFERENCES, BUILTIN_REFERENCE_COUNT } from '../src/lib/builtin-sounds';
+import { classifyFeatures, FEATURE_LENGTH, FEATURE_VERSION } from '../src/lib/audio';
 
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.resetModules(); });
-const samples = Float32Array.from({ length: 4000 }, (_, i) => 0.2 * Math.sin(2 * Math.PI * 440 * i / 8000));
-function mockAudio() {
-  const close = vi.fn(async () => undefined);
-  vi.stubGlobal('AudioContext', class {
-    decodeAudioData = async () => ({ duration: 0.5, length: samples.length, sampleRate: 8000, numberOfChannels: 1, getChannelData: () => samples });
-    close = close;
-  });
-  return close;
-}
-describe('merchant built-in catalog', () => {
-  it('maps all 76 actual sound files and all item metadata', () => {
-    expect(BUILTIN_REFERENCE_COUNT).toBe(76);
-    expect(BUILTIN_GROUPS).toHaveLength(38);
+
+describe('immediate built-in merchant catalog', () => {
+  it('maps all actual sound files and all current item metadata', () => {
+    expect(BUILTIN_REFERENCE_COUNT).toBe(76); expect(BUILTIN_GROUPS).toHaveLength(38);
     const urls = BUILTIN_GROUPS.flatMap(group => [group.pickupUrl, group.dropUrl]);
-    expect(new Set(urls).size).toBe(76);
+    expect(new Set(urls).size).toBe(BUILTIN_REFERENCE_COUNT);
     for (const url of urls) expect(existsSync(`public${url}`), url).toBe(true);
     expect(BUILTIN_ITEMS.length).toBe(catalog.groups.reduce((n, group) => n + group.candidates.length, 0));
     const mapping = { 1: 'common', 2: 'common', 3: 'rare', 4: 'epic', 5: 'legendary', 6: 'red' };
@@ -26,7 +20,8 @@ describe('merchant built-in catalog', () => {
       expect(BUILTIN_ITEMS.find(mapped => mapped.id === item.id && mapped.groupId === group.id)).toEqual({ ...item, rarity: mapping[item.rarity as keyof typeof mapping], groupId: group.id });
     }
   });
-  it('serves every built-in sound from the GitHub Pages subdirectory', async () => {
+
+  it('serves audio previews under the GitHub Pages subdirectory', async () => {
     vi.stubEnv('BASE_URL', '/arena-ear/');
     const { BUILTIN_GROUPS: groups } = await import('../src/lib/builtin-sounds');
     for (const group of groups) for (const url of [group.pickupUrl, group.dropUrl]) {
@@ -34,47 +29,51 @@ describe('merchant built-in catalog', () => {
       expect(existsSync(`public/${url.slice('/arena-ear/'.length)}`), url).toBe(true);
     }
   });
-  it('shares concurrent loading, bounds requests to four, and closes its context', async () => {
-    const close = mockAudio();
-    let active = 0, peak = 0;
-    const fetchMock = vi.fn(async () => {
-      active++; peak = Math.max(peak, active);
-      await new Promise(resolve => setTimeout(resolve, 1)); active--;
-      return { ok: true, arrayBuffer: async () => new ArrayBuffer(1) };
-    });
-    vi.stubGlobal('fetch', fetchMock);
-    const api = await import('../src/lib/builtin-sounds');
-    const firstProgress = vi.fn(), secondProgress = vi.fn();
-    const [a, b] = await Promise.all([api.loadBuiltinReferences(firstProgress), api.loadBuiltinReferences(secondProgress)]);
-    expect(a).toBe(b); expect(a).toHaveLength(76); expect(fetchMock).toHaveBeenCalledTimes(76); expect(peak).toBeLessThanOrEqual(4);
-    expect(close).toHaveBeenCalledOnce();
-    expect(firstProgress).toHaveBeenLastCalledWith(76, 76); expect(secondProgress).toHaveBeenLastCalledWith(76, 76);
-    expect(api.getBuiltinLoadState()).toEqual({ loaded: 76, total: 76, status: 'ready' });
-    expect(a.every(ref => ref.rarity === undefined && ref.features.length === 56 && ref.id === `builtin-${ref.groupId}-${ref.action}`)).toBe(true);
-    expect(await api.loadBuiltinReferences()).toBe(a); expect(fetchMock).toHaveBeenCalledTimes(76);
-  });
-  it('fails atomically, closes after in-flight jobs, and retries instead of caching failure', async () => {
-    const close = mockAudio();
-    let fail = true;
-    const fetchMock = vi.fn(async () => ({ ok: !fail, status: 404, arrayBuffer: async () => new ArrayBuffer(1) }));
-    vi.stubGlobal('fetch', fetchMock);
-    const api = await import('../src/lib/builtin-sounds');
-    await expect(api.loadBuiltinReferences()).rejects.toThrow('HTTP 404');
-    expect(close).toHaveBeenCalledOnce(); expect(api.getBuiltinLoadState().status).toBe('error');
-    fail = false;
-    expect(await api.loadBuiltinReferences()).toHaveLength(76);
-    expect(close).toHaveBeenCalledTimes(2);
-  });
-  it('rejects corrupt decoded files and never exposes partially loaded references', async () => {
-    const close = vi.fn(async () => undefined);
-    vi.stubGlobal('AudioContext', class {
-      decodeAudioData = async () => { throw new Error('Corrupt OGG'); };
-      close = close;
-    });
-    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(1) })));
-    const api = await import('../src/lib/builtin-sounds');
-    await expect(api.loadBuiltinReferences()).rejects.toThrow('Corrupt OGG');
-    expect(close).toHaveBeenCalledOnce(); expect(api.getBuiltinLoadState()).toEqual({ loaded: 0, total: 76, status: 'error' });
+
+  it('contains exactly one complete versioned descriptor for every unchanged source recording', () => {
+    expect(manifest.featureVersion).toBe(FEATURE_VERSION); expect(manifest.featureLength).toBe(FEATURE_LENGTH);
+    const expected = [...new Set(catalog.groups.flatMap(group => [group.pickup.files[0], group.drop.files[0]]).map(path => path.split('/').at(-1)))].sort();
+    expect(Object.keys(manifest.samples).sort()).toEqual(expected);
+    for (const [filename, entry] of Object.entries(manifest.samples)) {
+      expect(entry.features).toHaveLength(FEATURE_LENGTH);
+      expect(entry.features.every(value => Number.isFinite(value) && value >= 0 && value <= 1)).toBe(true);
+      expect(Math.hypot(...entry.features.slice(0, 40))).toBeCloseTo(1, 6);
+      expect(Math.hypot(...entry.features.slice(40))).toBeCloseTo(1, 6);
+      expect(entry.duration).toBeGreaterThan(0); expect(entry.duration).toBeLessThanOrEqual(15);
+      expect(entry.sampleRate).toBe(48000);
+      expect(createHash('sha256').update(readFileSync(`public/sounds/merchant/${filename}`)).digest('hex'), filename).toBe(entry.sha256);
+    }
   });
 
+  it('is ready at import with no network, Web Audio, uploads or manual loading', async () => {
+    const fetchMock = vi.fn(() => { throw new Error('Startup must not fetch audio'); });
+    const audioMock = vi.fn(() => { throw new Error('Startup must not decode audio'); });
+    vi.stubGlobal('fetch', fetchMock); vi.stubGlobal('AudioContext', audioMock);
+    const api = await import('../src/lib/builtin-sounds');
+    expect(api.getBuiltinLoadState()).toEqual({ loaded: 76, total: 76, status: 'ready' });
+    expect(api.BUILTIN_REFERENCES).toHaveLength(76);
+    const firstProgress = vi.fn(), secondProgress = vi.fn();
+    const first = api.loadBuiltinReferences(firstProgress);
+    expect(firstProgress).toHaveBeenCalledWith(76, 76);
+    const [a, b] = await Promise.all([first, api.loadBuiltinReferences(secondProgress)]);
+    expect(a).toBe(api.BUILTIN_REFERENCES); expect(b).toBe(a);
+    expect(secondProgress).toHaveBeenCalledWith(76, 76);
+    expect(fetchMock).not.toHaveBeenCalled(); expect(audioMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps progress subscribers from breaking the ready library', async () => {
+    const { loadBuiltinReferences } = await import('../src/lib/builtin-sounds');
+    await expect(loadBuiltinReferences(() => { throw new Error('UI subscriber failed'); })).resolves.toHaveLength(76);
+  });
+
+  it('builds descriptors into the recognizer without assigning a shared group rarity', () => {
+    expect(BUILTIN_REFERENCES).toHaveLength(BUILTIN_REFERENCE_COUNT);
+    for (const reference of BUILTIN_REFERENCES) {
+      expect(reference.id).toBe(`builtin-${reference.groupId}-${reference.action}`);
+      expect(reference.source).toBe('builtin'); expect(reference.rarity).toBeUndefined();
+      expect(reference.candidates).toEqual(BUILTIN_GROUPS.find(group => group.id === reference.groupId)?.candidates);
+      const result = classifyFeatures(reference.features, BUILTIN_REFERENCES);
+      expect(result.status === 'unknown' || result.groupId === reference.groupId, reference.id).toBe(true);
+    }
+  });
 });

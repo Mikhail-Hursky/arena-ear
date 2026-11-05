@@ -1,4 +1,4 @@
-import type { AudioMatch, Rarity, SoundReference } from '../types';
+import type { AudioMatch, Rarity, SoundHypothesis, SoundReference } from '../types';
 
 const RATE = 8000;
 const FFT = 512;
@@ -86,19 +86,25 @@ export function featureSimilarity(a: number[], b: number[]): number {
 }
 
 export function classifyFeatures(features: number[], references: SoundReference[], threshold = 0.88): AudioMatch {
+  threshold = Number.isFinite(threshold) ? Math.max(0, Math.min(1, threshold)) : 0.88;
   const unknown = (reason: string, similarity = 0): AudioMatch => ({ status: 'unknown', name: 'Не определено', similarity, timestamp: Date.now(), reason });
   if (!features.length) return unknown('Тишина или слишком короткий звук');
   if (!references.length) return unknown('Добавьте эталонные записи звуков');
   const ranked = references.map(reference => ({ reference, score: featureSimilarity(features, reference.features) })).sort((a, b) => b.score - a.score);
   const best = ranked[0];
   if (best.score <= 0 || best.score < threshold) return unknown('Нет достаточно похожего эталона', best.score);
-  const equivalent = (reference: SoundReference): boolean => {
-    if (reference.groupId !== undefined || best.reference.groupId !== undefined) return reference.groupId !== undefined && reference.groupId === best.reference.groupId;
-    return reference.name === best.reference.name && reference.rarity === best.reference.rarity;
-  };
-  const competing = ranked.find(item => !equivalent(item.reference));
-  if (competing && best.score - competing.score < 0.025) return unknown('Неоднозначное совпадение эталонов', best.score);
-  return { status: 'match', referenceId: best.reference.id, name: best.reference.name, rarity: best.reference.groupId === undefined ? best.reference.rarity : undefined, groupId: best.reference.groupId, action: best.reference.action, candidates: best.reference.candidates, similarity: best.score, timestamp: Date.now() };
+  const families = new Map<string, SoundHypothesis>();
+  for (const { reference, score } of ranked) {
+    if (score < threshold || best.score - score >= 0.025) continue;
+    const key = reference.groupId !== undefined ? `group:${reference.groupId}` : JSON.stringify([reference.name, reference.rarity]);
+    if (!families.has(key)) families.set(key, {
+      referenceId: reference.id, name: reference.name, rarity: reference.groupId === undefined ? reference.rarity : undefined,
+      groupId: reference.groupId, action: reference.action, candidates: reference.candidates, similarity: score,
+    });
+  }
+  const alternatives = [...families.values()];
+  if (alternatives.length > 1) return { ...unknown('Неоднозначное совпадение эталонов', best.score), alternatives, threshold };
+  return { status: 'match', ...alternatives[0], alternatives, threshold, timestamp: Date.now() };
 }
 
 function makeContext(): AudioContext {

@@ -27,6 +27,8 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test
+      - name: Verify item catalog and sound integrity
+        run: node scripts/sync-merchant-catalog.mjs --check
       - name: Build for GitHub Pages
         env:
           PAGES_BASE_PATH: /${{ github.event.repository.name }}/

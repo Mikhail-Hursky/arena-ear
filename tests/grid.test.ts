@@ -75,14 +75,14 @@ describe('conservative grid geometry', () => {
 
 describe('scanner lifecycle', () => {
   afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
-  function dom(play: () => Promise<void> = () => Promise.resolve()) {
+  function dom(play: () => Promise<void> = () => Promise.resolve(), getFrame = () => image()) {
     const videos: { pause: ReturnType<typeof vi.fn>; srcObject: unknown; play: typeof play; muted: boolean; playsInline: boolean; readyState: number; videoWidth: number; videoHeight: number }[] = [];
     vi.stubGlobal('document', { createElement: (tag: string) => {
       if (tag === 'video') {
         const video = { play, pause: vi.fn(), srcObject: null, muted: false, playsInline: false, readyState: 2, videoWidth: 150, videoHeight: 150 };
         videos.push(video); return video;
       }
-      return { width: 0, height: 0, getContext: () => ({ drawImage: vi.fn(), getImageData: () => image() }) };
+      return { width: 0, height: 0, getContext: () => ({ drawImage: vi.fn(), getImageData: getFrame }) };
     } });
     return videos;
   }
@@ -118,6 +118,35 @@ describe('scanner lifecycle', () => {
     reject(new Error('Old aborted play')); await old;
     expect(videos[1].srcObject).toBe(stream); expect(vi.getTimerCount()).toBe(1);
     scanner.stop(); expect(vi.getTimerCount()).toBe(0);
+  });
+  it('withdraws trusted geometry when the grid disappears or scanning is disabled', async () => {
+    vi.useFakeTimers();
+    let frame = image(); dom(undefined, () => frame);
+    const onViewChange = vi.fn();
+    const scanner = new GridScanner({ onDetection:vi.fn(), onViewChange });
+    await scanner.start(stream);
+    expect(scanner.hasFreshDetection()).toBe(true);
+    frame = image(); frame.data.fill(0);
+    await vi.advanceTimersByTimeAsync(750);
+    expect(onViewChange).toHaveBeenCalledWith('lost');
+    expect(scanner.hasFreshDetection()).toBe(false);
+    frame = image(); await vi.advanceTimersByTimeAsync(750);
+    expect(scanner.hasFreshDetection()).toBe(true);
+    scanner.setEnabled(false);
+    expect(scanner.hasFreshDetection()).toBe(false);
+    scanner.stop(); expect(scanner.eventTarget()).toBeUndefined();
+  });
+  it('samples fresh localized activity synchronously at audio onset', async () => {
+    vi.useFakeTimers(); let frame = image(); dom(undefined, () => frame);
+    const scanner = new GridScanner({ onDetection:vi.fn() });
+    await scanner.start(stream); await vi.advanceTimersByTimeAsync(250);
+    frame = image();
+    for (let y = 49; y < 72; y++) for (let x = 49; x < 72; x++) {
+      const p = (y * frame.width + x) * 4;
+      frame.data[p] = frame.data[p + 1] = frame.data[p + 2] = 100;
+    }
+    expect(scanner.eventTarget()).toBe('cell-1-1');
+    scanner.stop();
   });
 });
 

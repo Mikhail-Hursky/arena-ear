@@ -1,6 +1,6 @@
 import { DEFAULT_SETTINGS } from '../types';
 import { FEATURE_LENGTH } from './audio';
-import type { HistoryEntry, Rarity, Settings, SoundReference } from '../types';
+import type { HistoryEntry, ItemRecognition, Rarity, Settings, SoundCandidate, SoundHypothesis, SoundReference } from '../types';
 
 const PREFIX = 'arena-ear:v1:';
 const rarities: Rarity[] = ['common', 'rare', 'epic', 'legendary', 'red'];
@@ -78,11 +78,55 @@ function isHistoryEntry(value: unknown): value is HistoryEntry {
     && (value.status === 'match' || value.status === 'unknown')
     && (value.rarity === undefined || rarities.includes(value.rarity as Rarity));
 }
+function candidate(raw: unknown): SoundCandidate | undefined {
+  if (!object(raw) || !Number.isInteger(raw.id) || typeof raw.name !== 'string' || !raw.name.trim() || raw.name.length > 200
+    || !rarities.includes(raw.rarity as Rarity) || !Array.isArray(raw.size) || raw.size.length !== 2
+    || !raw.size.every(n => Number.isInteger(n) && n >= 1 && n <= 20)) return;
+  return { id:raw.id as number, name:raw.name, rarity:raw.rarity as Rarity, size:[raw.size[0],raw.size[1]] };
+}
+const candidates = (raw: unknown): SoundCandidate[] | undefined => Array.isArray(raw)
+  ? raw.slice(0,500).map(candidate).filter((c): c is SoundCandidate => !!c) : undefined;
+function hypothesis(raw: unknown): SoundHypothesis | undefined {
+  if (!object(raw) || typeof raw.referenceId !== 'string' || typeof raw.name !== 'string'
+    || !finite(raw.similarity) || raw.similarity < 0 || raw.similarity > 1) return;
+  return { referenceId:raw.referenceId.slice(0,150), name:raw.name.slice(0,200), similarity:raw.similarity,
+    groupId:Number.isInteger(raw.groupId) && (raw.groupId as number) > 0 ? raw.groupId as number : undefined,
+    action:raw.action === 'pickup' || raw.action === 'drop' ? raw.action : undefined,
+    rarity:rarities.includes(raw.rarity as Rarity) ? raw.rarity as Rarity : undefined,
+    candidates:candidates(raw.candidates) };
+}
+/** Bound and copy nested persisted evidence before rendering it. Old history stays compatible. */
+export function sanitizeHistoryEntry(raw: unknown): HistoryEntry | undefined {
+  if (!isHistoryEntry(raw)) return;
+  const base = hypothesis({ ...raw, referenceId:typeof raw.referenceId === 'string' ? raw.referenceId : '' });
+  if (!base) return;
+  const result: HistoryEntry = { ...base, id:raw.id.slice(0,150), cellId:raw.cellId.slice(0,150), map:raw.map.slice(0,150),
+    demo:raw.demo, status:raw.status, timestamp:raw.timestamp, reason:typeof raw.reason === 'string' ? raw.reason.slice(0,1000) : undefined,
+    threshold:finite(raw.threshold) && raw.threshold >= 0 && raw.threshold <= 1 ? raw.threshold : undefined };
+  if (Array.isArray(raw.alternatives)) result.alternatives = raw.alternatives.slice(0,100).map(hypothesis).filter((h): h is SoundHypothesis => !!h);
+  const recognition: unknown = raw.recognition;
+  if (object(recognition) && ['identified','ambiguous','conflict','audio-only'].includes(recognition.status as string)
+    && typeof recognition.reason === 'string'
+    && [recognition.candidatesBefore,recognition.candidatesAfter].every(n => Number.isInteger(n) && (n as number) >= 0 && (n as number) <= 500)
+    && Number.isInteger(recognition.observations) && (recognition.observations as number) >= 1 && (recognition.observations as number) <= 500) {
+    const size = recognition.observedSize;
+    const observedSize: [number,number] | undefined = Array.isArray(size) && size.length === 2 && size.every(n => Number.isInteger(n) && n >= 1 && n <= 20) ? [size[0],size[1]] : undefined;
+    const item = candidate(recognition.item);
+    const status = recognition.status as ItemRecognition['status'];
+    if (status !== 'identified' || (item && observedSize && result.candidates?.some(c => c.id === item.id))) {
+      result.recognition = { status, item, observedSize,
+        sizeSource:recognition.sizeSource === 'manual' || recognition.sizeSource === 'detected' ? recognition.sizeSource : undefined,
+        candidatesBefore:recognition.candidatesBefore as number, candidatesAfter:recognition.candidatesAfter as number,
+        observations:recognition.observations as number, reason:recognition.reason.slice(0,1000) };
+    }
+  }
+  return result;
+}
 export const loadHistory = (): HistoryEntry[] => {
   const data = read('history');
-  return Array.isArray(data) ? data.filter(isHistoryEntry).slice(0, 500) : [];
+  return Array.isArray(data) ? data.slice(0,500).map(sanitizeHistoryEntry).filter((h): h is HistoryEntry => !!h) : [];
 };
-export const saveHistory = (history: HistoryEntry[]): void => write('history', history.filter(isHistoryEntry).slice(0, 500));
+export const saveHistory = (history: HistoryEntry[]): void => write('history', history.slice(0,500).map(sanitizeHistoryEntry).filter(Boolean));
 
 export function downloadJson(filename: string, data: unknown): void {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

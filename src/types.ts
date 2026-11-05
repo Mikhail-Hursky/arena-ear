@@ -22,6 +22,37 @@ export interface SoundReference {
   sampleRate: number;
 }
 
+/** One plausible sound family; pickup/drop variants of a family are collapsed. */
+export interface SoundHypothesis {
+  referenceId: string;
+  name: string;
+  rarity?: Rarity;
+  groupId?: number;
+  action?: SoundAction;
+  candidates?: SoundCandidate[];
+  similarity: number;
+}
+
+/** Manual means an explicitly confirmed item footprint, not an arbitrary unit cell. */
+export interface ItemSizeEvidence {
+  width: number;
+  height: number;
+  source: 'detected' | 'manual';
+  confidence?: number;
+  allowRotation?: boolean;
+}
+
+export interface ItemRecognition {
+  status: 'identified' | 'ambiguous' | 'conflict' | 'audio-only';
+  item?: SoundCandidate;
+  observedSize?: [number, number];
+  sizeSource?: 'detected' | 'manual';
+  candidatesBefore: number;
+  candidatesAfter: number;
+  observations: number;
+  reason: string;
+}
+
 export interface AudioMatch {
   status: 'match' | 'unknown';
   referenceId?: string;
@@ -33,6 +64,10 @@ export interface AudioMatch {
   similarity: number;
   timestamp: number;
   reason?: string;
+  /** Retained above-threshold alternatives, including the best hypothesis. */
+  alternatives?: SoundHypothesis[];
+  threshold?: number;
+  recognition?: ItemRecognition;
 }
 
 export interface GridCell {

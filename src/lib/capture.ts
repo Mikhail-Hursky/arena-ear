@@ -1,5 +1,6 @@
 import type { GridDetection, GridRegion } from '../types';
 import { detectGrid } from './grid';
+import { GridActivityTracker } from './grid-activity';
 
 export function supportsCapture(): boolean {
   return typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getDisplayMedia;
@@ -30,7 +31,28 @@ export class GridScanner {
   private region?: GridRegion;
   private enabled = true;
   private generation = 0;
-  constructor(private options: { onDetection: (d: GridDetection) => void; onFrame?: (canvas: HTMLCanvasElement) => void; onError?: (error: unknown) => void }) {}
+  private activity = new GridActivityTracker();
+  private detection?: GridDetection;
+  private detectedAt = -Infinity;
+  constructor(private options: { onDetection: (d: GridDetection) => void; onFrame?: (canvas: HTMLCanvasElement) => void; onViewChange?: (reason: 'changed' | 'lost') => void; onCellsChanged?: (ids: string[]) => void; onError?: (error: unknown) => void }) {}
+  hasFreshDetection(): boolean { return this.enabled && !!this.detection && performance.now() - this.detectedAt <= 1000; }
+  private observe(image: ImageData): void {
+    if (!this.detection) return;
+    const activity = this.activity.update(image, this.detection, performance.now());
+    if (activity.changedView) this.options.onViewChange?.('changed');
+    else if (activity.changedCells?.length) this.options.onCellsChanged?.(activity.changedCells);
+  }
+  /** Sample the actual video at audio onset, rather than trusting an old timer frame. */
+  eventTarget(): string | undefined {
+    if (!this.video || !this.canvas || this.video.readyState < 2) return;
+    const ctx = this.canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+    try {
+      ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+      this.observe(ctx.getImageData(0, 0, this.canvas.width, this.canvas.height));
+      return this.activity.target(performance.now());
+    } catch { this.activity.reset(); return; }
+  }
   async start(stream: MediaStream, region?: GridRegion): Promise<void> {
     this.stop();
     const generation = this.generation;
@@ -48,6 +70,7 @@ export class GridScanner {
       throw error;
     }
     if (generation !== this.generation) return;
+    let lastDetection = -Infinity;
     const tick = () => {
       if (generation !== this.generation || !this.canvas) return;
       try {
@@ -60,10 +83,14 @@ export class GridScanner {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
           this.options.onFrame?.(canvas);
           if (generation !== this.generation) return;
-          if (this.enabled) {
-            const detection = detectGrid(ctx.getImageData(0, 0, canvas.width, canvas.height), this.region);
-            if (detection) this.options.onDetection(detection);
+          const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          if (this.enabled && performance.now() - lastDetection >= 650) {
+            lastDetection = performance.now();
+            const detection = detectGrid(image, this.region);
+            if (detection) { this.detection = detection; this.detectedAt = performance.now(); this.options.onDetection(detection); }
+            else if (this.detection) { this.detection = undefined; this.activity.reset(); this.options.onViewChange?.('lost'); }
           }
+          this.observe(image);
         }
       }
       } catch (error) {
@@ -74,7 +101,7 @@ export class GridScanner {
         }
         return;
       }
-      if (generation === this.generation) this.timer = setTimeout(tick, 700);
+      if (generation === this.generation) this.timer = setTimeout(tick, 120);
     };
     tick();
   }
@@ -84,7 +111,14 @@ export class GridScanner {
     this.timer = undefined;
     if (this.video) { this.video.pause(); this.video.srcObject = null; }
     this.video = null; this.canvas = null;
+    this.detection = undefined; this.detectedAt = -Infinity; this.activity.reset();
   }
-  setRegion(region: GridRegion): void { this.region = { ...region }; }
-  setEnabled(enabled: boolean): void { this.enabled = enabled; }
+  setRegion(region: GridRegion): void {
+    if (JSON.stringify(region) !== JSON.stringify(this.region)) { this.activity.reset(); this.detection = undefined; }
+    this.region = { ...region };
+  }
+  setEnabled(enabled: boolean): void {
+    if (this.enabled !== enabled) { this.activity.reset(); this.detection = undefined; }
+    this.enabled = enabled;
+  }
 }

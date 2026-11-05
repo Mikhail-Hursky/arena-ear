@@ -97,6 +97,22 @@ describe('built-in sound groups', () => {
     expect(result.candidates).toEqual(pickup.candidates); expect(result.rarity).toBeUndefined();
     expect(classifyFeatures(pickup.features, [pickup, { ...drop, groupId: 2 }]).status).toBe('unknown');
   });
+  it('keeps one above-threshold alternative per sound family for size disambiguation', () => {
+    const group = (id: number, action: 'pickup' | 'drop' = 'pickup') => ({ ...reference(440, `Group ${id}`), id: `${id}-${action}`, groupId: id, action });
+    const result = classifyFeatures(reference(440, 'query').features, [group(1), group(1, 'drop'), group(2)]);
+    expect(result.status).toBe('unknown'); expect(result.threshold).toBe(0.88);
+    expect(result.alternatives?.map(item => item.groupId)).toEqual([1, 2]);
+    expect(result.alternatives?.every(item => item.similarity >= 0.88)).toBe(true);
+  });
+  it('does not let a below-threshold runner-up veto an accepted sound family', () => {
+    const features = new Array(FEATURE_LENGTH).fill(0); features[0] = 1; features[40] = 1;
+    const other = [...features]; other[0] = 0.99; other[1] = Math.sqrt(1 - 0.99 ** 2);
+    const base = { ...reference(440, 'Group 1'), groupId: 1, features };
+    const result = classifyFeatures(features, [base, { ...base, id: 'group-2', groupId: 2, features: other }], 0.999);
+    expect(result.status).toBe('match'); expect(result.groupId).toBe(1); expect(result.alternatives).toHaveLength(1);
+    const failed = classifyFeatures(features, [{ ...base, features: other }], 0.999);
+    expect(failed.status).toBe('unknown'); expect(failed.alternatives).toBeUndefined();
+  });
 });
 
 describe('adaptive live event segmentation', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isSoundReference, parseReferenceLibrary, sanitizeSettings } from '../src/lib/storage';
+import { isSoundReference, parseReferenceLibrary, sanitizeHistoryEntry, sanitizeSettings } from '../src/lib/storage';
 import { DEFAULT_SETTINGS } from '../src/types';
 
 const reference = {id:'test',name:'Пример',rarity:'red',features:Array(56).fill(0.1),duration:1,createdAt:1700000000000,sampleRate:48000};
@@ -25,5 +25,24 @@ describe('persisted input validation', () => {
     expect(isSoundReference({...reference,features:Array(56).fill(NaN)})).toBe(false);
     expect(isSoundReference({...reference,features:Array(56).fill(0)})).toBe(false);
     expect(isSoundReference({...reference,features:Array(56).fill(100)})).toBe(false);
+  });
+});
+
+describe('persisted item recognition evidence', () => {
+  const item = { id:1, name:'Item', rarity:'red', size:[3,2] };
+  const entry = { id:'event', cellId:'cell-0-0', map:'farm', demo:false, status:'match', name:'Item', timestamp:123, similarity:.97,
+    candidates:[item], recognition:{ status:'identified', item, observedSize:[3,2], sizeSource:'manual', candidatesBefore:2, candidatesAfter:1, observations:1, reason:'Sound and size' } };
+  it('round-trips valid identification and discards malformed candidate/alternative objects', () => {
+    expect(sanitizeHistoryEntry(entry)?.recognition).toEqual(entry.recognition);
+    expect(sanitizeHistoryEntry({ ...entry, referenceId:42 })?.name).toBe('Item');
+    const clean = sanitizeHistoryEntry({ ...entry, candidates:[item, { name:'bad', size:'broken' }], alternatives:[{ wrong:true }] });
+    expect(clean?.candidates).toEqual([item]); expect(clean?.alternatives).toEqual([]);
+    expect(sanitizeHistoryEntry({ ...entry, candidates:{ nope:true }, recognition:{ status:'identified' } })?.candidates).toBeUndefined();
+  });
+  it('rejects invalid nested size, missing identified item, counts and corrupt top-level values', () => {
+    expect(sanitizeHistoryEntry({ ...entry, recognition:{ ...entry.recognition, observedSize:[NaN,2] } })?.recognition).toBeUndefined();
+    expect(sanitizeHistoryEntry({ ...entry, recognition:{ ...entry.recognition, candidatesBefore:Infinity } })?.recognition).toBeUndefined();
+    expect(sanitizeHistoryEntry({ ...entry, similarity:NaN })).toBeUndefined();
+    expect(sanitizeHistoryEntry(null)).toBeUndefined();
   });
 });

@@ -1,4 +1,18 @@
 @import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+.recognition-controls { padding: 16px; border-top: 1px solid #333c30; color: #c2c9ba; font-size: 12px; }
+.recognition-controls p { margin: 10px 0 0; line-height: 1.6; }
+.recognition-options { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+.recognition-options label { display:flex; align-items:center; gap:8px; cursor:pointer; }
+.recognition-options input { width:16px; height:16px; accent-color:#e2ee78; }
+.item-size-inputs { display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; margin-top:12px; }
+.item-size-inputs label { display:grid; gap:6px; }
+.item-size-inputs input { width:74px; max-width:100%; padding:9px; border:1px solid #48533e; border-radius:5px; background:#171d16; color:#ecf0e6; }
+.item-size-inputs > span { align-self:center; margin-top:18px; }
+.item-size-inputs button { min-height:38px; }
+.recognition-summary { color:#e2ee78; font-size:11px; line-height:1.6; }
+.binding-note { color:#aebba4; font-size:11px; overflow-wrap:anywhere; }
+.recognition-conflict { color:#f1b789; }
 :root {
   font-family: "Golos Text", Arial, sans-serif;
   color: #e7e9e1;
