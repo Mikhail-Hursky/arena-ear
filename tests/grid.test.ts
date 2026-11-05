@@ -17,6 +17,11 @@ describe('pixel grid detection', () => {
   it('detects a rectangular merged cell from an absent local separator', () => { const d = detectGrid(image(true)); expect(d?.cells).toHaveLength(15); expect(d?.cells[0]).toMatchObject({ row: 0, col: 0, width: 2, height: 1 }); });
   it('rejects region outside the image', () => { expect(detectGrid(image(), { x: 1, y: 1, width: 0, height: 0 })).toBeNull(); });
   it('builds a bounded manual grid', () => { expect(createManualGrid(3, 2).cells).toHaveLength(6); });
+  it('creates all merchant positions including the final row and column', () => {
+    const grid = createManualGrid(9,30);
+    expect(grid.cells).toHaveLength(270);
+    expect(grid.cells.at(-1)).toMatchObject({id:'cell-29-8',row:29,col:8});
+  });
 });
 
 function eraseLine(frame: ImageData, vertical: boolean, fixed: number, from: number, to: number) {

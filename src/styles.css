@@ -426,6 +426,12 @@ h1 {
     linear-gradient(90deg, #c9df8703 1px, transparent 1px), #12170f;
   background-size: 20px 20px;
 }
+.grid-stage:not(.empty-stage) {
+  max-height: min(68vh,680px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.grid-preset-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
 .merchant-grid {
   display: grid;
   gap: 7px;
@@ -560,6 +566,7 @@ h1 {
   .slot-rarities { font-size:7px; bottom:5px; left:2px; right:2px; }
   .slot.short-slot .slot-label-full { display:none; }
   .slot.short-slot .slot-label-compact { display:inline; }
+  .slot.short-slot .slot-match .slot-label-compact { font-size:8px; }
 }
 .idle-slot {
   opacity: 0.38;

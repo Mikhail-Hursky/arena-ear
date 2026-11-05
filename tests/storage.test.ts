@@ -15,6 +15,16 @@ describe('persisted input validation', () => {
     expect(settings.gridColumns).toBe(2);
     expect(settings.sensitivity).toBe(100);
   });
+  it('uses the merchant nine-column thirty-row layout and preserves all thirty rows', () => {
+    expect(sanitizeSettings(null)).toMatchObject({gridColumns:9,gridRows:30});
+    expect(sanitizeSettings({gridColumns:9,gridRows:30})).toMatchObject({gridColumns:9,gridRows:30});
+    expect(sanitizeSettings({gridRows:999}).gridRows).toBe(30);
+  });
+  it('migrates the former default layout while preserving unrelated preferences and custom layouts', () => {
+    expect(sanitizeSettings({gridColumns:8,gridRows:10,sensitivity:77,autoScan:false}))
+      .toMatchObject({gridColumns:9,gridRows:30,sensitivity:77,autoScan:false});
+    expect(sanitizeSettings({gridColumns:6,gridRows:12})).toMatchObject({gridColumns:6,gridRows:12});
+  });
   it('accepts an exported reference collection', () => {
     expect(parseReferenceLibrary(JSON.stringify({references:[reference]}))).toEqual([reference]);
   });

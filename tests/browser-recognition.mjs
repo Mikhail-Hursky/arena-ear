@@ -225,8 +225,36 @@ async function manual() {
   } finally { await context.close(); }
 }
 
+async function merchantGridPreset() {
+  const context = await browser.newContext({viewport:{width:1440,height:1100}});
+  const page = await context.newPage();
+  try {
+    await page.addInitScript(() => localStorage.setItem('arena-ear:v1:settings',JSON.stringify({gridColumns:8,gridRows:10,sensitivity:77})));
+    await page.goto(origin);
+    await page.getByRole('heading',{name:'Анализ груза',exact:true}).waitFor();
+    await page.getByRole('button',{name:'Ручная сетка',exact:true}).click();
+    assert.equal(await page.locator('.merchant-grid .slot').count(),270);
+    const last = page.getByRole('button',{name:'Выбрать ячейку cell-29-8',exact:true});
+    await last.scrollIntoViewIfNeeded();
+    assert.equal(await last.isVisible(),true);
+    assert.equal(await page.locator('.grid-stage').evaluate(el=>el.scrollHeight>el.clientHeight),true);
+    await page.getByRole('button',{name:'Настройки',exact:true}).click();
+    assert.equal(await page.getByRole('spinbutton',{name:'Столбцы',exact:true}).inputValue(),'9');
+    assert.equal(await page.getByRole('spinbutton',{name:'Строки',exact:true}).inputValue(),'30');
+    assert.equal(await page.getByRole('spinbutton',{name:'Строки',exact:true}).getAttribute('max'),'30');
+    await page.getByRole('spinbutton',{name:'Строки',exact:true}).fill('28');
+    await page.getByRole('button',{name:'Сетка продавца 9 × 30',exact:true}).click();
+    assert.equal(await page.locator('.merchant-grid .slot').count(),270);
+    const saved = await page.evaluate(()=>JSON.parse(localStorage.getItem('arena-ear:v1:settings')));
+    assert.equal(saved.gridRows,30); assert.equal(saved.sensitivity,77);
+    await page.setViewportSize({width:390,height:844});
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+    result.scenarios.merchantGrid = {columns:9,rows:30,positions:270,legacyMigrated:true,scrollable:true,presetRestoresThirtyRows:true,mobileNoOverflow:true};
+  } finally { await context.close(); }
+}
+
 try {
-  await automatic(); await manual();
+  await automatic(); await manual(); await merchantGridPreset();
   assert.deepEqual(result.pageErrors, []); assert.deepEqual(result.httpErrors, []);
   console.log(JSON.stringify({ passed: true, ...result }, null, 2));
 } finally { await browser.close(); }

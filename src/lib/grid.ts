@@ -1,10 +1,11 @@
 import type { GridCell, GridDetection, GridRegion } from '../types';
+import { DEFAULT_SETTINGS } from '../types';
 const FULL: GridRegion = { x: 0, y: 0, width: 1, height: 1 };
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
 export function createManualGrid(columns: number, rows: number): GridDetection {
-  columns = clamp(Math.round(Number.isFinite(columns) ? columns : 8), 1, 30);
-  rows = clamp(Math.round(Number.isFinite(rows) ? rows : 10), 1, 30);
+  columns = clamp(Math.round(Number.isFinite(columns) ? columns : DEFAULT_SETTINGS.gridColumns), 1, 30);
+  rows = clamp(Math.round(Number.isFinite(rows) ? rows : DEFAULT_SETTINGS.gridRows), 1, 30);
   return { columns, rows, confidence: 1, region: { ...FULL }, source: 'manual',
     cells: Array.from({ length: columns * rows }, (_, i) => ({ id: `cell-${Math.floor(i / columns)}-${i % columns}`, row: Math.floor(i / columns), col: i % columns, width: 1, height: 1 })) };
 }

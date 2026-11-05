@@ -22,14 +22,15 @@ export function sanitizeSettings(raw: unknown): Settings {
   const region = object(data.region) ? data.region : {};
   const x = bounded(region.x, 0, 0.95, DEFAULT_SETTINGS.region.x);
   const y = bounded(region.y, 0, 0.95, DEFAULT_SETTINGS.region.y);
+  const legacyGrid = data.gridColumns === 8 && data.gridRows === 10;
   return {
     sensitivity: bounded(data.sensitivity, 0, 100, DEFAULT_SETTINGS.sensitivity),
     matchThreshold: bounded(data.matchThreshold, 0.5, 1, DEFAULT_SETTINGS.matchThreshold),
     soundEnabled: typeof data.soundEnabled === 'boolean' ? data.soundEnabled : DEFAULT_SETTINGS.soundEnabled,
     autoScan: typeof data.autoScan === 'boolean' ? data.autoScan : DEFAULT_SETTINGS.autoScan,
     region: { x, y, width: bounded(region.width, 0.05, 1 - x, DEFAULT_SETTINGS.region.width > 1 - x ? 1 - x : DEFAULT_SETTINGS.region.width), height: bounded(region.height, 0.05, 1 - y, Math.min(DEFAULT_SETTINGS.region.height, 1 - y)) },
-    gridColumns: Math.round(bounded(data.gridColumns, 2, 16, DEFAULT_SETTINGS.gridColumns)),
-    gridRows: Math.round(bounded(data.gridRows, 2, 24, DEFAULT_SETTINGS.gridRows)),
+    gridColumns: legacyGrid ? DEFAULT_SETTINGS.gridColumns : Math.round(bounded(data.gridColumns, 2, 16, DEFAULT_SETTINGS.gridColumns)),
+    gridRows: legacyGrid ? DEFAULT_SETTINGS.gridRows : Math.round(bounded(data.gridRows, 2, 30, DEFAULT_SETTINGS.gridRows)),
   };
 }
 

@@ -113,6 +113,6 @@ export const DEFAULT_SETTINGS: Settings = {
   soundEnabled: false,
   autoScan: true,
   region: { x: 0.65, y: 0.15, width: 0.31, height: 0.72 },
-  gridColumns: 8,
-  gridRows: 10,
+  gridColumns: 9,
+  gridRows: 30,
 };

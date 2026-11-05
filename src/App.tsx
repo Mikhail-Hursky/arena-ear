@@ -30,6 +30,7 @@ import type {
   SoundReference,
   ItemSizeEvidence,
 } from "./types";
+import { DEFAULT_SETTINGS } from "./types";
 import { AudioEngine, analyzeFile, createReference } from "./lib/audio";
 import {
   requestCapture,
@@ -138,7 +139,7 @@ function MerchantGrid({
   return (
     <div
       className={`merchant-grid ${mini ? "mini-grid" : ""}`}
-      style={{ gridTemplateColumns: `repeat(${grid?.columns || 8},1fr)` }}
+      style={{ gridTemplateColumns: `repeat(${grid?.columns || DEFAULT_SETTINGS.gridColumns},1fr)` }}
     >
       {grid
         ? grid.cells.map((c) => {
@@ -189,7 +190,7 @@ function MerchantGrid({
             </button>
           );
         })
-        : Array.from({ length: 48 }, (_, i) => (
+        : Array.from({ length: DEFAULT_SETTINGS.gridColumns * 6 }, (_, i) => (
             <div className="slot idle-slot" key={i}>
               <span className="slot-cross">+</span>
             </div>
@@ -575,12 +576,12 @@ export default function App() {
   function clearGrid() {
     resetView();
   }
-  function manualGrid() {
+  function manualGrid(columns = settings.gridColumns, rows = settings.gridRows) {
     resetView();
     if (!live) stop();
     scanner.current?.setEnabled(false);
     setSettings((s) => ({ ...s, autoScan: false }));
-    setGrid(createManualGrid(settings.gridColumns, settings.gridRows));
+    setGrid(createManualGrid(columns, rows));
     setDemo(false);
     setSelected("");
     latest.current.selected = "";
@@ -1108,7 +1109,7 @@ export default function App() {
                 <button onClick={() => setPreview((v) => !v)}>
                   {preview ? "Скрыть" : "Показать"} превью захвата
                 </button>
-                <button onClick={manualGrid}>Ручная сетка</button>
+                <button onClick={() => manualGrid()}>Ручная сетка</button>
                 <button onClick={clearGrid} disabled={!grid}>
                   Очистить сетку
                 </button>
@@ -1535,18 +1536,25 @@ export default function App() {
                       <input
                         type="number"
                         min="2"
-                        max="20"
+                        max={k === 'gridColumns' ? 16 : 30}
                         value={settings[k]}
                         onChange={(e) =>
                           setSettings((s) => ({
                             ...s,
-                            [k]: Math.max(2, Math.min(20, +e.target.value)),
+                            [k]: Math.max(2, Math.min(k === 'gridColumns' ? 16 : 30, +e.target.value)),
                           }))
                         }
                       />
                     </label>
                   ))}
                 </div>
+                <p className="muted">Сетка продавца: 9 столбцов × 30 строк. Автопоиск показывает реально видимую часть захвата.</p>
+                <div className="grid-preset-actions">
+                <button className="secondary" onClick={() => {
+                  setSettings(s => ({...s,gridColumns:DEFAULT_SETTINGS.gridColumns,gridRows:DEFAULT_SETTINGS.gridRows}));
+                  manualGrid(DEFAULT_SETTINGS.gridColumns,DEFAULT_SETTINGS.gridRows);
+                  setPage('analyzer');
+                }}>Сетка продавца 9 × 30</button>
                 <button
                   className="secondary"
                   onClick={() => {
@@ -1556,6 +1564,7 @@ export default function App() {
                 >
                   Применить ручную сетку
                 </button>
+                </div>
               </section>
             </div>
           )}
