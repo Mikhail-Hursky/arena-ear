@@ -32,6 +32,8 @@ async function newPage(autoScan = true) {
   });
   await page.goto(origin);
   await page.getByRole('heading', { name: 'Анализ груза', exact: true }).waitFor();
+  assert.equal(await page.getByRole('checkbox', { name:'Учитывать поворот предмета', exact:true }).count(), 0);
+  await page.getByText(/Ориентация в магазине фиксирована/).waitFor();
   assert.equal(await page.getByRole('button', { name: 'Слушать игру', exact: true }).first().isEnabled(), true);
   const state = await page.evaluate(async () => (await import('/src/lib/builtin-sounds.ts')).getBuiltinLoadState());
   assert.deepEqual(state, { loaded: 76, total: 76, status: 'ready' });
@@ -179,6 +181,10 @@ async function manual() {
     const sculptures = await upload(36);
     assert.equal(sculptures.recognition.status, 'ambiguous'); assert.equal(sculptures.rarity, undefined);
     assert.deepEqual(sculptures.candidates.map(item => item.name).sort(), ['Majestic Sculpture', 'Plaster Sculpture']);
+    await confirm(2, 3);
+    const transposed = await upload(28);
+    assert.equal(transposed.status, 'unknown'); assert.equal(transposed.recognition.status, 'conflict');
+    assert.deepEqual(transposed.candidates, []);
     await confirm(3, 3);
     const conflict = await upload(28);
     assert.equal(conflict.status, 'unknown'); assert.equal(conflict.recognition.status, 'conflict'); assert.equal(conflict.candidates.length, 0);
@@ -186,7 +192,8 @@ async function manual() {
     await page.getByRole('spinbutton', { name: 'Ширина предмета', exact: true }).fill('0');
     assert.equal(await page.getByRole('button', { name: 'Подтвердить размер', exact: true }).isDisabled(), true);
     result.scenarios.manual = { threeByTwo: lion.name, twoByOne: cheetah.name, repeatObservations: repeated.recognition.observations,
-      ambiguous: sculptures.candidates.map(item => item.name), impossibleSize: conflict.recognition.status, zeroSizeRejected: true };
+      ambiguous: sculptures.candidates.map(item => item.name), transposedSize: transposed.recognition.status,
+      impossibleSize: conflict.recognition.status, zeroSizeRejected: true };
   } finally { await context.close(); }
 }
 

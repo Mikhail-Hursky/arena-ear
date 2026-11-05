@@ -209,7 +209,6 @@ export default function App() {
     [recording, setRecording] = useState(false);
   const builtinRefs = BUILTIN_REFERENCES;
   const [autoAssociate, setAutoAssociate] = useState(true),
-    [allowRotation, setAllowRotation] = useState(true),
     [binding, setBinding] = useState('');
   const manualSizes = useRef(new Map<string, ItemSizeEvidence>());
   const [, sizeChanged] = useState(0);
@@ -234,7 +233,7 @@ export default function App() {
   const stream = useRef<MediaStream | null>(null),
     engine = useRef<AudioEngine | null>(null),
     scanner = useRef<GridScanner | null>(null),
-    latest = useRef({ selected, map, settings, refs: combinedReferences, autoAssociate, allowRotation }),
+    latest = useRef({ selected, map, settings, refs: combinedReferences, autoAssociate }),
     mounted = useRef(true),
     overlayRef = useRef<typeof overlay>(null),
     gridRef = useRef<GridDetection | null>(null),
@@ -254,11 +253,11 @@ export default function App() {
   }
   function sizeForCell(cellId: string, detection = gridRef.current): ItemSizeEvidence | undefined {
     const confirmed = manualSizes.current.get(cellId);
-    if (confirmed) return { ...confirmed, allowRotation: latest.current.allowRotation };
+    if (confirmed) return { ...confirmed };
     const cell = detection?.cells.find(c => c.id === cellId);
     if (detection?.source === 'detected' && !scanner.current?.hasFreshDetection()) return;
     return detection?.source === 'detected' && cell
-      ? { width:cell.width, height:cell.height, source:'detected', confidence:detection.confidence, allowRotation:latest.current.allowRotation }
+      ? { width:cell.width, height:cell.height, source:'detected', confidence:detection.confidence }
       : undefined;
   }
   function resetView(message = '') {
@@ -282,7 +281,7 @@ export default function App() {
   }
   gridRef.current = grid;
   overlayRef.current = overlay;
-  latest.current = { selected, map, settings, refs: combinedReferences, autoAssociate, allowRotation };
+  latest.current = { selected, map, settings, refs: combinedReferences, autoAssociate };
   const previousGeometrySettings = useRef(JSON.stringify([settings.region, settings.autoScan, settings.gridColumns, settings.gridRows]));
   useEffect(() => {
     const identity = JSON.stringify([settings.region, settings.autoScan, settings.gridColumns, settings.gridRows]);
@@ -955,9 +954,8 @@ export default function App() {
                     </span>
                   </div>
                   <RecognitionControls grid={grid} cell={grid?.cells.find(c => c.id === selected)}
-                    confirmed={manualSizes.current.get(selected)} allowRotation={allowRotation} autoAssociate={autoAssociate}
+                    confirmed={manualSizes.current.get(selected)} autoAssociate={autoAssociate}
                     onAutoAssociate={value => { invalidatePending(); latest.current.autoAssociate = value; setAutoAssociate(value); }}
-                    onRotation={value => { invalidatePending(); latest.current.allowRotation = value; setAllowRotation(value); }}
                     onConfirm={confirmSize} onClear={() => confirmSize()} />
                 </section>
                 <aside className="analysis-panel">

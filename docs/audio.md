@@ -22,4 +22,4 @@ Browser use requires secure context (HTTPS or localhost), AudioWorklet, Web Audi
 
 ## Sound + item dimensions
 
-See [recognition.md](recognition.md) for exact size filtering, rotation, catalog ambiguity, synchronous built-ins, onset snapshots and visual cell association. No audio similarity score is converted to an item probability.
+See [recognition.md](recognition.md) for exact ordered width/height filtering (fixed merchant orientation), catalog ambiguity, synchronous built-ins, onset snapshots and visual cell association. No audio similarity score is converted to an item probability.

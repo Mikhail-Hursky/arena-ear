@@ -9,14 +9,13 @@ function validDimension(value: number): boolean {
 
 function trustedSize(evidence?: ItemSizeEvidence): evidence is ItemSizeEvidence {
   return !!evidence && validDimension(evidence.width) && validDimension(evidence.height)
-    && (evidence.allowRotation === undefined || typeof evidence.allowRotation === 'boolean')
     && (evidence.source === 'manual' || (evidence.source === 'detected'
       && Number.isFinite(evidence.confidence) && evidence.confidence! >= MIN_SIZE_CONFIDENCE && evidence.confidence! <= 1));
 }
 
 function compatibleSize(size: [number, number], evidence: ItemSizeEvidence): boolean {
-  return (size[0] === evidence.width && size[1] === evidence.height)
-    || (evidence.allowRotation !== false && size[0] === evidence.height && size[1] === evidence.width);
+  // Merchant cargo preserves the catalog orientation: width and height are ordered.
+  return size[0] === evidence.width && size[1] === evidence.height;
 }
 
 function uniqueCandidates(candidates: SoundCandidate[]): SoundCandidate[] {

@@ -23,8 +23,7 @@ describe('sound and footprint recognition', () => {
   it('preserves the true candidate and all indistinguishable siblings across the entire built-in catalog', () => {
     for (const group of BUILTIN_GROUPS) for (const candidate of group.candidates) {
       const [width, height] = candidate.size;
-      const expected = group.candidates.filter(item => (item.size[0] === width && item.size[1] === height)
-        || (item.size[1] === width && item.size[0] === height));
+      const expected = group.candidates.filter(item => item.size[0] === width && item.size[1] === height);
       const result = resolveItemMatch(match(group.candidates, group.id), manual(width, height));
       expect(result.candidates, `${group.id}/${candidate.id}`).toEqual(expected);
       expect(result.recognition?.status).toBe(expected.length === 1 ? 'identified' : 'ambiguous');
@@ -38,9 +37,25 @@ describe('sound and footprint recognition', () => {
     expect(result.recognition).toMatchObject({ status: 'identified', item: lion, candidatesBefore: 2, candidatesAfter: 1, observedSize: [3, 2], sizeSource: 'manual', observations: 1 });
   });
 
-  it('accepts rotated footprints by default and can enforce orientation', () => {
-    expect(resolveItemMatch(match(), manual(2, 3)).recognition?.item).toEqual(lion);
-    expect(resolveItemMatch(match(), { ...manual(2, 3), allowRotation: false }).recognition?.status).toBe('conflict');
+  it('rejects a transposed footprint for both manual and detected shop dimensions', () => {
+    for (const evidence of [manual(2, 3), { width:2, height:3, source:'detected' as const, confidence:.9 }]) {
+      const result = resolveItemMatch(match(), evidence);
+      expect(result.recognition?.status).toBe('conflict');
+      expect(result.candidates).toEqual([]);
+      expect(result.recognition?.item).toBeUndefined();
+    }
+  });
+
+  it('distinguishes vertical and horizontal items sharing the same sound', () => {
+    const raw = match([lion, plaster]);
+    expect(resolveItemMatch(raw, manual(3, 2)).recognition?.item).toEqual(lion);
+    expect(resolveItemMatch(raw, manual(2, 3)).recognition?.item).toEqual(plaster);
+  });
+
+  it('resolves near-equal sound groups using orientation as well as area', () => {
+    const raw = ambiguous([hypothesis(28, [lion]), hypothesis(36, [plaster], .98)]);
+    expect(resolveItemMatch(raw, manual(3, 2)).groupId).toBe(28);
+    expect(resolveItemMatch(raw, manual(2, 3)).groupId).toBe(36);
   });
 
   it('does not claim a unique item when sound and dimensions are shared', () => {
@@ -83,7 +98,7 @@ describe('sound and footprint recognition', () => {
   });
 
   it('preserves ambiguous families when their items fit the same dimensions', () => {
-    const result = resolveItemMatch(ambiguous([hypothesis(28, [lion]), hypothesis(36, [plaster, majestic], 0.98)]), manual(3, 2));
+    const result = resolveItemMatch(ambiguous([hypothesis(28, [lion]), hypothesis(36, [{ ...plaster, size:[3,2] }, { ...majestic, size:[3,2] }], 0.98)]), manual(3, 2));
     expect(result.status).toBe('unknown'); expect(result.groupId).toBeUndefined();
     expect(result.recognition?.status).toBe('ambiguous'); expect(result.candidates).toHaveLength(3);
   });
@@ -113,7 +128,7 @@ describe('sound and footprint recognition', () => {
 
   it('intersects repeated compatible observations without increasing sound similarity', () => {
     const prior = resolveItemMatch(match([lion, cheetah]), manual(3, 2));
-    const raw = ambiguous([hypothesis(28, [lion]), hypothesis(36, [plaster, majestic], 0.98)]);
+    const raw = ambiguous([hypothesis(28, [lion]), hypothesis(36, [{ ...plaster, size:[3,2] }, { ...majestic, size:[3,2] }], 0.98)]);
     const result = resolveItemMatch(raw, manual(3, 2), prior);
     expect(result.recognition?.status).toBe('identified'); expect(result.recognition?.item).toEqual(lion);
     expect(result.recognition?.observations).toBe(2); expect(result.similarity).toBe(0.99);
@@ -121,7 +136,7 @@ describe('sound and footprint recognition', () => {
 
   it('reports conflicting repeated observations and does not invent a certainty', () => {
     const prior = resolveItemMatch(match([plaster, majestic], 36), manual(2, 3));
-    const result = resolveItemMatch(match([lion]), manual(3, 2), prior);
+    const result = resolveItemMatch(match([{ ...lion, size:[2,3] }]), manual(2, 3), prior);
     expect(result.status).toBe('unknown'); expect(result.recognition?.status).toBe('conflict'); expect(result.recognition?.item).toBeUndefined();
   });
 

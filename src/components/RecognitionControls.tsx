@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import type { GridCell, GridDetection, ItemSizeEvidence } from '../types';
 
-export function RecognitionControls({ grid, cell, confirmed, allowRotation, autoAssociate, onRotation, onAutoAssociate, onConfirm, onClear }: {
+export function RecognitionControls({ grid, cell, confirmed, autoAssociate, onAutoAssociate, onConfirm, onClear }: {
   grid: GridDetection | null; cell?: GridCell; confirmed?: ItemSizeEvidence;
-  allowRotation: boolean; autoAssociate: boolean; onRotation: (value: boolean) => void;
+  autoAssociate: boolean;
   onAutoAssociate: (value: boolean) => void; onConfirm: (size: ItemSizeEvidence) => void; onClear: () => void;
 }) {
   const [width, setWidth] = useState(''), [height, setHeight] = useState('');
@@ -15,15 +15,14 @@ export function RecognitionControls({ grid, cell, confirmed, allowRotation, auto
   return <section className="recognition-controls" aria-label="Распознавание по звуку и размеру">
     <div className="recognition-options">
       <label><input type="checkbox" checked={autoAssociate} onChange={e => onAutoAssociate(e.target.checked)} /> Автовыбор по изменению кадра</label>
-      <label><input type="checkbox" checked={allowRotation} onChange={e => onRotation(e.target.checked)} /> Учитывать поворот предмета</label>
     </div>
-    <p>Звук + размер в ячейках. {cell ? `Выбрана ${cell.id}.` : 'Выберите груз в сетке или на превью для проверки размера.'}</p>
+    <p>Звук + ширина × высота. Ориентация в магазине фиксирована. {cell ? `Выбрана ${cell.id}.` : 'Выберите груз в сетке или на превью для проверки размера.'}</p>
     {cell && <>
       <div className="item-size-inputs">
         <label>Ширина<input aria-label="Ширина предмета" type="number" min="1" max="20" value={width} onChange={e => setWidth(e.target.value)} /></label>
         <span>×</span>
         <label>Высота<input aria-label="Высота предмета" type="number" min="1" max="20" value={height} onChange={e => setHeight(e.target.value)} /></label>
-        <button className="secondary" disabled={!valid} onClick={() => onConfirm({ width:Number(width), height:Number(height), source:'manual', allowRotation })}>Подтвердить размер</button>
+        <button className="secondary" disabled={!valid} onClick={() => onConfirm({ width:Number(width), height:Number(height), source:'manual' })}>Подтвердить размер</button>
         {confirmed && <button className="text-button" onClick={onClear}>Размер из сетки</button>}
       </div>
       <p className="muted">{confirmed ? 'Размер подтверждён вручную.' : grid?.source === 'detected'

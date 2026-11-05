@@ -39,7 +39,6 @@ export interface ItemSizeEvidence {
   height: number;
   source: 'detected' | 'manual';
   confidence?: number;
-  allowRotation?: boolean;
 }
 
 export interface ItemRecognition {
